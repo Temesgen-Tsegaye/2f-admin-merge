@@ -1,34 +1,35 @@
-"use client";
+"use client"
 
-import { Box, Typography } from "@mui/material";
-import Image from "next/image";
-import React, { useState } from "react";
-import { useRouter } from "next/router";
-import tmoviesLogo from "../../../public/t_movie_logo.png";
-import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
-import CircleIcon from "@mui/icons-material/Circle";
-import UserProfileDialog from "./UserProfileDialog";
+import { Box, Typography } from "@mui/material"
+import Image from "next/image"
+import React, { useState } from "react"
+import { usePathname } from "next/navigation"
+// import tmoviesLogo from "../../../public/t_movie_logo.png";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone"
+import CircleIcon from "@mui/icons-material/Circle"
+import UserProfileDialog from "./UserProfileDialog"
 
 function AdminNav() {
-  const [open, setOpen] = useState(false);
-  const router = useRouter();
+  const [open, setOpen] = useState(false)
+  const pathname = usePathname()
 
   const handleCircleIconClick = () => {
-    setOpen(true);
-  };
+    setOpen(true)
+  }
 
   const handleClose = () => {
-    setOpen(false);
-  };
+    setOpen(false)
+  }
 
   const titles: { [key: string]: string } = {
     "/admin": "Dashboard",
-    "/admin/channel": "Channel",
-    "/admin/program": "Program",
-    "/admin/role": "Role",
-  };
+    "/admin/channels": "Channel",
+    "/admin/programs": "Program",
+    "/admin/roles": "Role",
+    "/admin/users": "User",
+  }
 
-  const currentTitle = titles[router.pathname] || "Admin";
+  const currentTitle = titles[pathname] || "Admin"
 
   return (
     <Box
@@ -55,7 +56,7 @@ function AdminNav() {
           zIndex: 10,
         }}
       >
-        <Image src={tmoviesLogo} width="30" alt="T-Movie Logo" />
+        {/* <Image src={tmoviesLogo} width="30" alt="T-Movie Logo" /> */}
         <Typography
           sx={{
             fontSize: {
@@ -105,7 +106,7 @@ function AdminNav() {
         </Box>
       </Box>
     </Box>
-  );
+  )
 }
 
-export default AdminNav;
+export default AdminNav

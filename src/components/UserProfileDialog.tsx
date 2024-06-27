@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import React from "react";
+import React, { useCallback, useEffect, useMemo } from "react"
 import {
   Dialog,
   DialogContent,
@@ -8,29 +8,44 @@ import {
   Avatar,
   Typography,
   Button,
-} from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useProgramsContext } from "@/context/ProgramsContext";
+} from "@mui/material"
+import { useRouter } from "next/navigation"
+import { signOut, useSession } from "next-auth/react"
+// import { useProgramsContext } from "@/context/ProgramsContext";
 
 interface UserProfileDialogProps {
-  open: boolean;
-  onClose: () => void;
+  open: boolean
+  onClose: () => void
 }
 
 const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
   open,
   onClose,
 }) => {
+  // const { state } = useProgramsContext();
 
-  const { state } = useProgramsContext();
+  // const { user } = state;
 
-  const { user } = state;
+  const router = useRouter()
 
-  const router = useRouter();
+  const signOutUser = async () => {
+    await signOut({ callbackUrl: "/", redirect: true })
+  }
 
-  const handleLogout = () => {
-    router.push("/");
-  };
+  const { data: session } = useSession()
+  const user = useMemo(() => {
+    return session?.user
+  }, [session?.user])
+
+  const getAbility = useCallback(async () => {
+    if (user) {
+      console.log(user)
+    }
+  }, [user])
+
+  useEffect(() => {
+    getAbility()
+  }, [getAbility])
   return (
     <Dialog
       open={open}
@@ -55,19 +70,19 @@ const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
       >
         <Avatar sx={{ width: 56, height: 56, marginBottom: "8px" }} />
         <Typography variant="h6" sx={{ marginBottom: "8px" }}>
-          {user ? user.username : ""}
+          {user ? user.email : ""}
         </Typography>
         <Typography variant="body2" sx={{ marginBottom: "16px" }}>
           {user ? user.email : ""}
         </Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleLogout} color="warning">
+        <Button onClick={signOutUser} color="warning">
           Logout
         </Button>
       </DialogActions>
     </Dialog>
-  );
-};
+  )
+}
 
-export default UserProfileDialog;
+export default UserProfileDialog

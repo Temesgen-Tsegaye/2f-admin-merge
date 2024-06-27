@@ -1,20 +1,20 @@
 "use client"
 
-import React from "react";
-import { usePathname } from "next/navigation";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import LiveTvIcon from "@mui/icons-material/LiveTv";
-import MovieFilterIcon from "@mui/icons-material/MovieFilter";
-import { Box, Button } from "@mui/material";
-import Link from "next/link";
-import { defineAbilitiesFor } from "@/lib/abilities";
-import { useProgramsContext } from "@/context/ProgramsContext";
+import React from "react"
+import { usePathname } from "next/navigation"
+import DashboardIcon from "@mui/icons-material/Dashboard"
+import LiveTvIcon from "@mui/icons-material/LiveTv"
+import MovieFilterIcon from "@mui/icons-material/MovieFilter"
+import { Box, Button } from "@mui/material"
+import Link from "next/link"
+// import { defineAbilitiesFor } from "@/lib/abilities";
+// import { useProgramsContext } from "@/context/ProgramsContext";
 
 const AdminMenu: React.FC = () => {
-  const pathname = usePathname();
-  const { state } = useProgramsContext();
-  const { user } = state;
-  const ability = defineAbilitiesFor(user);
+  const pathname = usePathname()
+  // const { state } = useProgramsContext();
+  // const { user } = state;
+  // const ability = defineAbilitiesFor(user);
 
   const buttonStyles = (path: string) => ({
     width: "100%",
@@ -24,7 +24,7 @@ const AdminMenu: React.FC = () => {
       backgroundColor: "#869eb5",
       color: "#fff",
     },
-  });
+  })
 
   return (
     <Box
@@ -47,36 +47,36 @@ const AdminMenu: React.FC = () => {
           zIndex: 10,
         }}
       >
-        <Link href="/dashboard" passHref>
+        <Link href="/admin" passHref>
           <Button
             variant="text"
             startIcon={<DashboardIcon />}
-            sx={buttonStyles("/dashboard")}
+            sx={buttonStyles("/admin")}
           >
             Dashboard
           </Button>
         </Link>
-        {ability.can("read", "Channel") && (
-          <Link href="/channels" passHref>
+        {/* {ability.can("read", "Channel") && (
+          <Link href="/admin/channels" passHref>
             <Button
               variant="text"
               startIcon={<LiveTvIcon />}
-              sx={buttonStyles("/channels")}
+              sx={buttonStyles("/admin/channels")}
             >
               Channels
             </Button>
           </Link>
-        )}
-        <Link href="/programs" passHref>
+        )} */}
+        <Link href="/admin/programs" passHref>
           <Button
             variant="text"
             startIcon={<MovieFilterIcon />}
-            sx={buttonStyles("/programs")}
+            sx={buttonStyles("/admin/programs")}
           >
             Programs
           </Button>
         </Link>
-        {ability.can("read", "User") && (
+        {/* {ability.can("read", "User") && (
           <Link href="/users" passHref>
             <Button
               variant="text"
@@ -86,10 +86,10 @@ const AdminMenu: React.FC = () => {
               Users
             </Button>
           </Link>
-        )}
+        )} */}
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default AdminMenu;
+export default AdminMenu
