@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Program {
+  id          Int      @id @default(autoincrement())
+  title       String
+  duration    Int
+  description String
+  status      Boolean  @default(true)
+  channelId   Int
+  channel     Channel  @relation(fields: [channelId], references: [id])
+  typeId      Int
+  type        Type     @relation(fields: [typeId], references: [id])
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+  videoUrl    String?
+  released    DateTime
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Channel {
+  id       Int      @id @default(autoincrement())
+  name     String
+  status   Boolean  @default(true)
+  program   Program[]
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+}
+
+model Type {
+  id     Int     @id @default(autoincrement())
+  name   String
+  program Program[]
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String
+  program Program[]
+}
+
+model Role {
+  id         Int          @id @default(autoincrement())
+  name       String
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  Users      User[]
+  Permissions Permission[]
+  rolePermissions RolePermission[]
+}
+
+model Permission {
+  id        Int      @id @default(autoincrement())
+  name      String
+  action    String
+  subject   String
+  inverted  Boolean  @default(false)
+  condition Json?
+  reason    String?
+  fields    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Roles      Role[]
+  rolePermissions RolePermission[]
+}
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @relation(fields: [roleId], references: [id])
+  roleId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  program     Program[]
+  channel   Channel[]
+}
+
+model RolePermission {
+  id        Int      @id @default(autoincrement())
+  roleId       Int
+  permissionId Int
+  role         Role     @relation(fields: [roleId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+}

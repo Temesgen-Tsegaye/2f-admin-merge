@@ -1,26 +1,38 @@
-"use client"
+import React from "react";
+import { Container, Paper, Box } from "@mui/material";
+import LoginForm from "@/components/login/LoginForm";
+import LogoSection from "@/components/login/LogoSection";
 
-import  {useEffect,useState} from 'react';
-import {socket} from "@/utils/socket-cleint"
-export default function Home() {
-    
-  const [message,setMessage] = useState('hello')
-
-  useEffect(() => {
-    socket.on('news', (message) => {
-      console.log('received');
-      console.log(message,'cli');
-        setMessage(message)
-    })
-    return () => {
-      socket.off('connect')
-    }
-  }, [])
+const HomePage: React.FC = () => {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-        <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} className='bg-white text-black'/>
-      <button onClick={() => socket.emit('news',message)}>send</button>
-         {message}
-    </main>
+    <Container
+      sx={{
+        mt: 3,
+        maxWidth: {
+          xs: 450,
+          sm: 550,
+          md: 750,
+          lg: 950,
+          xl: 1050,
+        },
+        height: "95vh",
+      }}
+    >
+      <Paper
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "column", md: "row" },
+          borderRadius: 8,
+          boxShadow: "0 2px 4px rgba(0, 0, 0)",
+          textAlign: "center",
+          height: "94%",
+        }}
+      >
+        <LogoSection />
+        <LoginForm />
+      </Paper>
+    </Container>
   );
-}
+};
+
+export default HomePage;
