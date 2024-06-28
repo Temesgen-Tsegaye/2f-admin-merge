@@ -2,7 +2,7 @@
 
 import React, { use, useEffect, useState } from "react";
 import DashboardCountCard from "./DashboardCountCard";
-import { countChannels } from "@/server-actions/channelActions";
+import { countChannels } from "@/actions/channelAction";
 // import { useSocket } from "@/utils/socketUtils";
 
 const ChannelCount: React.FC = () => {

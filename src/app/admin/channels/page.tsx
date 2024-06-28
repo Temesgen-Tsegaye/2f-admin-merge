@@ -1,31 +1,23 @@
-// import React from "react";
-// import ChannelManagement from "@/components/channels/ChannelManagement";
-// import withAuth from "@/hoc/withAuth";
+import { fetchChannels } from "@/actions/channelAction";
+import { options } from "@/app/api/auth/[...nextauth]/options";
+import ChannelManagement from "@/components/channels/ChannelManagement";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
-// const Channels: React.FC<{ user: any }> = ({ user }) => {
-//   return <ChannelManagement user={user} />;
-// };
-
-// export default withAuth(Channels);
-import React from "react"
-import { Box } from "@mui/material"
-import ChannelTable from "@/components/channels/ChannelTable"
-
-const page = () => {
+const ChannelPage = async ({searchParams}: any) => {
+  const session = await getServerSession(options)
+  if (!session) {
+    redirect("/")
+  }
+  console.log("session", session)
+  console.log(searchParams)
+  const {records,totalRowCount}=await fetchChannels(searchParams,session?.user)
   return (
-    <Box
-      sx={{
-        position: "relative",
-        overflow: "auto",
-        maxWidth: "calc(100vw - 15vw)",
-        boxShadow: "2px 2px 10px 5px rgba(0, 0, 0, 0.2)",
-      }}
-    >
-      <Box sx={{ position: "relative" }}>
-        <ChannelTable />
-      </Box>
-    </Box>
-  )
-}
+    <div>
+      <ChannelManagement data={records} totalRowCount={totalRowCount}/>
+    </div>
+  );
+};
 
-export default page
+export default ChannelPage;
+

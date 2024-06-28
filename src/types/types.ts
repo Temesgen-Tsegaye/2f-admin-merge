@@ -1,6 +1,6 @@
 export type UserData = {
-  id?: number
-  username: string
+  id?: string
+  name: string
   email: string
   password: string
   roleId: number
@@ -13,8 +13,8 @@ export type UserData = {
 export type ChannelData = {
   id?: number
   name?: string
-  isActive?: boolean
-  userId?: number
+  status?: boolean
+  userId?: string
 }
 
 export type ProgramData = {
@@ -31,7 +31,34 @@ export type PermissionData = {
   action: string
   subject: string
   inverted?: boolean
-  conditions?: any
+  condition?: any
   fields?: any
   reason?: string
 }
+
+export interface UserWithPermission {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  roleId: number;
+  role: {
+    id: number;
+    name: string;
+  };
+}
+
+// export type UserWithPermission = UserWithRole & {
+//   permissions: {
+//     id: number;
+//     name: string;
+//     action: string
+//     subject: string
+//     inverted: boolean
+//     condition: any
+//     reason: string | null
+//     fields: string | null
+//     createdAt: Date
+//     updatedAt: Date
+//   }[];
+// }

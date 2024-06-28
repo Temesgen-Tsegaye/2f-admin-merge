@@ -9,38 +9,42 @@ import {
   allRecords,
   getRecordById,
 } from "../utils/prismaTableUtils";
-
 import { applyFilter } from "@/utils/filterHandler";
 import { defineAbilitiesFor } from "@/lib/abilities";
-import { UserWithPermission, ChannelData, ProgramData } from "@/types/types";
+import { UserWithPermission,ProgramData } from "@/types/types";
 import { accessibleBy } from "@casl/prisma";
+import {
+  ProgramSchema,
+  Program,
+} from "@/schema/index";
 import { pick } from "lodash";
 import { permittedFieldsOf } from "@casl/ability/extra";
-import { revalidatePath } from "next/cache";
 
-const createChannel = async (data: ChannelData, user: UserWithPermission) => {
+const include = { channel: true, type: true, category: true };
+
+const createProgram = async (data: Partial<Program>, user: UserWithPermission) => {
   const ability = await defineAbilitiesFor(user);
 
-  if (ability.can("create", "Channel")) {
-    return await createRecord("channel", data);
+  if (ability.can("create", "Program")) {
+    ProgramSchema.parse(data);
+    return await createRecord("program", data);
   }
   throw new Error("Permission denied");
 };
 
-const updateChannel = async (
+const updateProgram = async (
   id: number,
-  data: ChannelData,
+  data: Partial<Program>,
   user: UserWithPermission
 ) => {
   const ability = await defineAbilitiesFor(user);
-  const FIELDS_OF_CHANNEL = ["name", "status"];
-  const fields = permittedFieldsOf(ability, "update", "Channel", {
-    fieldsFrom: (rule) => rule.fields || FIELDS_OF_CHANNEL,
+
+const FIELDS_OF_PROGRAM = ["title","description","duration","videoUrl","type","channel","category"]
+
+  const fields = permittedFieldsOf(ability, "update", "Program", {
+    fieldsFrom: (rule) => rule.fields || FIELDS_OF_PROGRAM,
   });
-  console.log(fields);
-  // if (!fields.includes('name')) {
-  //   throw new Error('You are not allowed to update the name of the channel');
-  // }
+
   const updateData = pick(data, fields);
 
   if (Object.keys(updateData).length === 0) {
@@ -50,9 +54,11 @@ const updateChannel = async (
   }
 
   try {
+    ProgramSchema.partial().parse(data);
+
     return await updateRecord(
-      "channel",
-      { AND: accessibleBy(ability, "update").Channel, id },
+      "program",
+      { AND: [accessibleBy(ability, "update").Program], id },
       updateData
     );
   } catch (error) {
@@ -60,35 +66,34 @@ const updateChannel = async (
   }
 };
 
-const deleteChannel = async (id: number, user: UserWithPermission) => {
+const deleteProgram = async (id: number, user: UserWithPermission) => {
   const ability = await defineAbilitiesFor(user);
 
-  if (ability.can("delete", "Channel")) {
+  if (ability.can("delete", "Program")) {
     try {
-      return await deleteRecord("channel", {
-        where: { AND: accessibleBy(ability, "delete").Channel, id },
+      return await deleteRecord("program", {
+        where: { AND: accessibleBy(ability, "delete").Program, id },
       });
     } catch (error) {
       throw new Error("Permission denied");
     }
   }
-
   throw new Error("Permission denied");
 };
 
-const countChannels = async () => {
-  return await countRecord("channel");
+const countPrograms = async () => {
+  return await countRecord("program");
 };
 
-const allChannels = async () => {
-  return await allRecords("channel");
+const allPrograms = async () => {
+  return await allRecords("program", include);
 };
 
-const getChannelById = async (id: number) => {
-  return await getRecordById("channel", id);
+const getProgramById = async (id: number) => {
+  return await getRecordById("program", id);
 };
 
-const fetchChannels = async (
+const fetchPrograms = async (
   {
     start = "0",
     size = "10",
@@ -97,18 +102,21 @@ const fetchChannels = async (
     globalFilter = "",
     sorting = "[]",
   }: ProgramData,
-  // urlquery: ProgramData,
   user: UserWithPermission
 ) => {
-  // const { start, size, filters, globalFilter, sorting, filtersFn } = urlquery;
-
   const ability = await defineAbilitiesFor(user);
-  console.log(ability)
 
   let where: Record<string, any> = {};
 
   if (globalFilter) {
-    where.OR = [{ name: { contains: globalFilter, mode: "insensitive" } }];
+    where.OR = [
+      { title: { contains: globalFilter, mode: "insensitive" } },
+      { description: { contains: globalFilter, mode: "insensitive" } },
+      { videoUrl: { contains: globalFilter, mode: "insensitive" } },
+      { channel: { name: { contains: globalFilter, mode: "insensitive" } } },
+      { type: { name: { contains: globalFilter, mode: "insensitive" } } },
+      { category: { name: { contains: globalFilter, mode: "insensitive" } } },
+    ];
   }
 
   let mergedFilters: any[] = [];
@@ -135,17 +143,17 @@ const fetchChannels = async (
   }
 
   const { records, totalRowCount } = await fetchRecords(
-    "channel",
+    "program",
     {
-      AND: accessibleBy(ability).Channel,
+      AND: accessibleBy(ability).Program,
       ...where,
     },
-
     orderBy,
     {
-      skip: start && size && parseInt(start, 10) * parseInt(size, 10),
-      take: size && parseInt(size, 10),
-    }
+      skip: parseInt(start, 10) * parseInt(size, 10),
+      take: parseInt(size, 10),
+    },
+    include
   );
 
   return {
@@ -155,11 +163,11 @@ const fetchChannels = async (
 };
 
 export {
-  createChannel,
-  updateChannel,
-  deleteChannel,
-  countChannels,
-  allChannels,
-  fetchChannels,
-  getChannelById,
+  createProgram,
+  updateProgram,
+  deleteProgram,
+  fetchPrograms,
+  countPrograms,
+  allPrograms,
+  getProgramById,
 };

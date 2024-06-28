@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import DashboardCountCard from "./DashboardCountCard";
-import { usersCount } from "@/server-actions/userActions";
+import { usersCount } from "@/actions/userActions";
 
 // import { useSocket } from "@/utils/socketUtils";
 

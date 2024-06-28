@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import DashboardCountCard from "./DashboardCountCard";
-import { countPrograms } from "@/server-actions/programActions";
+import { countPrograms } from "@/actions/programActions";
 // import { useSocket } from "@/utils/socketUtils";
 
 const ProgramCount: React.FC = () => {

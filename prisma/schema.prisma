@@ -53,8 +53,7 @@ model Role {
   updatedAt  DateTime     @updatedAt
 
   Users      User[]
-  Permissions Permission[]
-  rolePermissions RolePermission[]
+  permissions RolePermission[]
 }
 
 model Permission {
@@ -69,8 +68,7 @@ model Permission {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Roles      Role[]
-  rolePermissions RolePermission[]
+  roles RolePermission[]
 }
 model User {
   id        String   @id @default(uuid())

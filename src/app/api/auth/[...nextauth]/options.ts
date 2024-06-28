@@ -2,6 +2,8 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import { prisma } from "@/db"
 import { NextAuthOptions } from "next-auth"
+import { getAllRolesWithPermission } from "@/actions/roleActions"
+import { getUser } from "@/actions/userActions"
 
 export const options: NextAuthOptions = {
   pages: {
@@ -19,16 +21,22 @@ export const options: NextAuthOptions = {
         if (!credentials?.email || !credentials.password) {
           return null
         }
-        const user = await prisma.user.findFirst({
-          where: { email: credentials.email },
-          include: {
-            role: {
-              include: {
-                Permissions: true,
-              },
-            },
-          },
-        })
+        // const user = await prisma.user.findUnique({
+        //   where: { email: credentials.email },
+        //   include: {
+        //     role: {
+        //        include: {
+        //     permissions: {
+        //       include: {
+        //         permission: true,
+        //       },
+        //     },
+        //   },
+        //     },
+        //   },
+        // })
+
+        const user = await getUser(credentials.email )
 
         if (!user) {
           return null
@@ -42,7 +50,7 @@ export const options: NextAuthOptions = {
           name: user.name,
           email: user.email,
           roleId: user.roleId,
-          permissions: user.role.Permissions,
+          
         }
       },
     }),
@@ -52,9 +60,9 @@ export const options: NextAuthOptions = {
       if (user) {
         return {
           ...token,
-          roleId: user.roleId,
+          // roleId: user.roleId,
           id: user.id,
-          permissions: user.permissions,
+         
         }
       }
       return token
@@ -66,7 +74,7 @@ export const options: NextAuthOptions = {
           ...session.user,
           roleId: token.roleId,
           id: token.id,
-          permissions: token.permissions,
+         
         },
       }
     },

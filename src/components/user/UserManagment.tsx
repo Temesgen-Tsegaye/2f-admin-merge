@@ -33,19 +33,14 @@ import {
   updateUser,
   deleteUser,
   getAllUsers,
-} from "@/server-actions/userActions";
+} from "@/actions/userActions";
 
 import { AppAbility, defineAbilitiesFor } from "@/lib/abilities";
-import { UserWithRole } from "@/context/types";
-import { getAllRoles } from "@/server-actions/roleActions";
+import { UserWithPermission } from "@/types/types";
+import { getAllRoles } from "@/actions/roleActions";
+import { userSchema } from "@/schema";
 
-const userSchema = z.object({
-  id: z.number().optional(),
-  username: z.string().min(1).max(20),
-  email: z.string().email(),
-  password: z.string(),
-  roleId: z.number().min(1),
-});
+
 
 interface Setter {
   id: number;
@@ -53,15 +48,15 @@ interface Setter {
 }
 
 interface UserManagementProps {
-  user: UserWithRole;
+  user: UserWithPermission;
 }
 
 const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
-  const [selectedUser, setSelectedUser] = useState<UserWithRole | null>(null);
-  const [formData, setFormData] = useState<Partial<UserWithRole>>({});
+  const [selectedUser, setSelectedUser] = useState<UserWithPermission | null>(null);
+  const [formData, setFormData] = useState<Partial<UserWithPermission>>({});
   const [validationError, setValidationError] = useState<string | null>(null);
   const [roles, setRoles] = useState<Setter[]>([]);
-  const [users, setUsers] = useState<UserWithRole[]>([]);
+  const [users, setUsers] = useState<UserWithPermission[]>([]);
 
   const [ability, setAbility] = useState<AppAbility | null>(null);
   const [open, setOpen] = useState(false);
@@ -90,7 +85,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
         setIsError(true);
         console.error("Error fetching users:", response.error);
       } else {
-        setUsers(response.users as UserWithRole[]);
+        setUsers(response.users as UserWithPermission[]);
       }
     } catch (error) {
       console.error("Unexpected error fetching users:", error);
@@ -113,7 +108,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
     fetchRoles();
   }, []);
   console.log(roles);
-  const handleOpen = (user: UserWithRole | null = null) => {
+  const handleOpen = (user: UserWithPermission | null = null) => {
     setSelectedUser(user);
     setFormData(user ? { ...user } : {});
     setOpen(true);
@@ -154,7 +149,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         await deleteUser(user, id);
@@ -165,7 +160,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
     }
   };
 
-  const columns = useMemo<MRT_ColumnDef<UserWithRole>[]>(
+  const columns = useMemo<MRT_ColumnDef<UserWithPermission>[]>(
     () => [
       {
         accessorKey: "id",
@@ -267,7 +262,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
             <TextField
               label="Username"
               name="username"
-              value={formData.username || ""}
+              value={formData.name || ""}
               onChange={handleChange}
               fullWidth
             />
