@@ -6,6 +6,7 @@ import {
   Typography,
   Box,
   InputAdornment,
+  CircularProgress,
 } from "@mui/material";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import PermIdentityIcon from "@mui/icons-material/PermIdentity";
@@ -14,13 +15,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { loginSchema } from "@/schema";
 import { useSession, signIn } from "next-auth/react";
-
 type FormData = {
   email: string;
   password: string;
 };
 
 const LoginForm: React.FC = () => {
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { data: session, status: sessionStatus } = useSession();
   const {
@@ -42,6 +43,7 @@ const LoginForm: React.FC = () => {
     const { email, password } = getValues();
     console.log(password);
     try {
+      setLoading(true);
       const result = await signIn("credentials", {
         email: email,
         password: password,
@@ -57,6 +59,8 @@ const LoginForm: React.FC = () => {
     } catch (error) {
       console.error("Login failed:", error);
       setError("An error occurred during login");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,7 +146,7 @@ const LoginForm: React.FC = () => {
             },
           }}
         >
-          LOGIN
+          {loading ? <CircularProgress color="inherit" size={25} /> : "LOGIN"}
         </Button>
       </form>
     </Box>

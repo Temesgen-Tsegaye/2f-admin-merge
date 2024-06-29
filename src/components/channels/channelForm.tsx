@@ -25,7 +25,7 @@ interface ChannelDialogProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSwitchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleClose: () => void;
-  handleSubmit: () => void;
+  handleSubmit: () => Promise<void>;
 }
 
 const ChannelDialog: React.FC<ChannelDialogProps> = ({
@@ -89,13 +89,24 @@ const ChannelDialog: React.FC<ChannelDialogProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={()=>{
+        {/* <Button onClick={()=>{
           handleSubmit().then(()=>{
             socket.emit("addChannel")
           })
-         
-
         }}>
+          {currentChannel ? "Update" : "Add"}
+        </Button> */}
+        <Button
+          onClick={() => {
+            handleSubmit()
+              .then(() => {
+                socket.emit("addChannel");
+              })
+              .catch((error) => {
+                console.error("Submit error:", error);
+              });
+          }}
+        >
           {currentChannel ? "Update" : "Add"}
         </Button>
       </DialogActions>

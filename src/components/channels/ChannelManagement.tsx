@@ -82,30 +82,16 @@ const ChannelManagement: React.FC<ChannelManagementProps> = ({
     setValidationError(null);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (): Promise<void> => {
     try {
       if (currentChannel && currentChannel.id !== undefined) {
         const { userId } = await getChannelById(currentChannel.id);
 
-        if (
-          ability &&
-          ability.can(
-            "update",
-            subject("Channel", { ...currentChannel } as Channel)
-          )
-        ) {
-          await updateChannel(
-            currentChannel.id,
-            { ...formData, userId },
-            user as UserWithPermission
-          );
-          // setRefetcher(true)
+        if (ability && ability.can("update", subject("Channel", { ...currentChannel } as Channel))) {
+          await updateChannel(currentChannel.id, { ...formData, userId }, user as UserWithPermission);
         } else {
-          setValidationError(
-            "You do not have permission to update this channel."
-          );
+          setValidationError("You do not have permission to update this channel.");
         }
-        // setRefetcher(false)
       } else if (ability && ability.can("create", "Channel")) {
         await createChannel({ ...formData, userId: user!.id }, user!);
         socket.emit("addChannel");
@@ -126,14 +112,12 @@ const ChannelManagement: React.FC<ChannelManagementProps> = ({
     const channelToDelete = channels.find((channel) => channel.id === id);
     if (
       ability &&
-      ability.can(
-        "delete",
-        subject("Channel", { ...channelToDelete } as Channel)
-      ) &&
+      ability.can("delete", subject("Channel", { ...channelToDelete } as Channel)) &&
       window.confirm("Are you sure you want to delete this channel?")
     ) {
       try {
         await deleteChannel(id, user!);
+        setChannels(channels.filter((channel) => channel.id !== id));
       } catch (error) {
         console.error("Error deleting channel:", error);
       }
