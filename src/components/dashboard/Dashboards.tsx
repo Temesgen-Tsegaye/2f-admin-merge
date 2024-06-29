@@ -20,7 +20,6 @@ const Dashboard: React.FC = () => {
   return (
     <Box
       sx={{
-        mt: 10,
         ml: "auto",
         mr: "auto",
         borderRadius: "5px",
