@@ -30,15 +30,15 @@ export const ProgramSchema = z.object({
   duration: z.number().positive(),
   description: z.string().min(1),
   videoUrl: z.string().url(),
-  airDate: z.date().optional(),
-  isActive: z.boolean().optional(),
+  released: z.date().optional(),
+  status: z.boolean().optional(),
   typeId: z.number(),
   categoryId: z.number(),
   channelId: z.number(),
   channel: ChannelSchema.optional(),
   type: TypeSchema.optional(),
   category: CategorySchema.optional(),
-  userId: z.string().optional(),
+  userId: z.string().optional()
 });
 
 export const userSchema = z.object({

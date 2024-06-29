@@ -1,9 +1,25 @@
-// import React from "react";
-// import UsersManagement from "@/components/user/UserManagment";
-// import withAuth from "@/hoc/withAuth";
+// import { fetchUsers } from "@/actions/userActions";
+import { options } from "@/app/api/auth/[...nextauth]/options";
+import UserManagement from "@/components/users/UserManagment";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
-// const Users: React.FC<{ user: any }> = ({ user }) => {
-//   return <UsersManagement user={user} />;
-// };
+const UserPage = async ({searchParams}: any) => {
+  const session = await getServerSession(options)
+  if (!session) {
+    redirect("/")
+  }
+  console.log("session", session)
+  // console.log(searchParams)
+  // const {records,totalRowCount}=await fetchUsers(searchParams,session?.user)
+  return (
+    <div>
+      <UserManagement user={session?.user}/>
+      {/* <UserManagement data={records} totalRowCount={totalRowCount}/> */}
+    </div>
+  );
+};
 
-// export default withAuth(Users);
+export default UserPage;
+
+

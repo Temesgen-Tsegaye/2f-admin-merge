@@ -20,8 +20,8 @@ const createRecord = async (model, data, io, eventName) => {
     if (io && eventName) {
       io.emit(eventName);
     }
-    // revalidatePath(`/admin/${model}s`);
-    revalidatePath(`/admin/channels`);
+    revalidatePath(`/admin/${model}s`);
+    // revalidatePath(`/admin/channels`);
 
 
     return records;
@@ -50,7 +50,9 @@ const updateRecord = async (model, where, data, io, eventName) => {
     console.error(`Error updating ${model}:`, error);
    return(error.message);
   }
-  revalidatePath(`/admin/channels`);
+  // revalidatePath(`/admin/${model}s`);
+
+  // revalidatePath(`/admin/channels`);
  
 };
 

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import {
   Container,
@@ -9,7 +11,7 @@ import {
   Grid,
   Paper,
 } from "@mui/material";
-import { getAllPermissions, createRole } from "@/server-actions/userActions";
+import { getAllPermissions, createRole } from "@/actions/userActions";
 import { Permission } from "@prisma/client";
 
 const RoleManagement = () => {
@@ -83,7 +85,11 @@ const RoleManagement = () => {
         />
 
         {Object.keys(groupedPermissions).map((subject) => (
-          <Paper elevation={3} style={{ marginBottom: "10px", padding: "10px" }} key={subject}>
+          <Paper
+            elevation={3}
+            style={{ marginBottom: "10px", padding: "10px" }}
+            key={subject}
+          >
             <Typography variant="subtitle1" fontSize="24px">
               {subject}
             </Typography>
@@ -106,8 +112,16 @@ const RoleManagement = () => {
           </Paper>
         ))}
 
-        {successMessage && <Typography color="green" fontWeight="600">{successMessage}</Typography>}
-        {errorMessage && <Typography color="red" fontWeight="600">{errorMessage}</Typography>}
+        {successMessage && (
+          <Typography color="green" fontWeight="600">
+            {successMessage}
+          </Typography>
+        )}
+        {errorMessage && (
+          <Typography color="red" fontWeight="600">
+            {errorMessage}
+          </Typography>
+        )}
 
         <Button
           type="submit"

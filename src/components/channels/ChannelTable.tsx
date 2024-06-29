@@ -71,10 +71,8 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
 
 
   useEffect(() => {
-
     setIsLoading(true);
     ;
-
     const fetchURL = new URLSearchParams(searchParams)
     fetchURL.set("start", `${pagination.pageIndex}`)
     fetchURL.set("size", `${pagination.pageSize}`)

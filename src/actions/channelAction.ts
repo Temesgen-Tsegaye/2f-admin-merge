@@ -17,6 +17,7 @@ import { accessibleBy } from "@casl/prisma";
 import { pick } from "lodash";
 import { permittedFieldsOf } from "@casl/ability/extra";
 import { revalidatePath } from "next/cache";
+import { prisma } from "@/db";
 
 const createChannel = async (data: ChannelData, user: UserWithPermission) => {
   const ability = await defineAbilitiesFor(user);
@@ -81,7 +82,13 @@ const countChannels = async () => {
 };
 
 const allChannels = async () => {
-  return await allRecords("channel");
+  try {
+    const records = await prisma.channel.findMany();
+    return records;
+  } catch (error) {
+    console.error(`Error fetching all channel records:`, error);
+    throw new Error("failed to fetch channels");
+  }
 };
 
 const getChannelById = async (id: number) => {
@@ -103,7 +110,7 @@ const fetchChannels = async (
   // const { start, size, filters, globalFilter, sorting, filtersFn } = urlquery;
 
   const ability = await defineAbilitiesFor(user);
-  console.log(ability)
+  console.log(ability);
 
   let where: Record<string, any> = {};
 

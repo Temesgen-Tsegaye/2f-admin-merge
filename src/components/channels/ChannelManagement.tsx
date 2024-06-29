@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
@@ -11,7 +10,6 @@ import {
   createChannel,
   updateChannel,
   deleteChannel,
-  fetchChannels,
   getChannelById,
 } from "@/actions/channelAction";
 import { ZodError } from "zod";
@@ -20,12 +18,14 @@ import { subject } from "@casl/ability";
 import { Channel } from "@prisma/client";
 
 interface ChannelManagementProps {
- 
-  data:Channel[]
-  totalRowCount:number
+  data: Channel[];
+  totalRowCount: number;
 }
 
-const ChannelManagement: React.FC<ChannelManagementProps> = ({data,totalRowCount}) => {
+const ChannelManagement: React.FC<ChannelManagementProps> = ({
+  data,
+  totalRowCount,
+}) => {
   const [open, setOpen] = useState(false);
   const [currentChannel, setCurrentChannel] = useState<ChannelData | null>(
     null
@@ -58,7 +58,7 @@ const ChannelManagement: React.FC<ChannelManagementProps> = ({data,totalRowCount
 
     fetchAbilities();
   }, [user]);
-console.log(ability)
+
   const handleOpen = (channel: ChannelData | null = null) => {
     setCurrentChannel(channel);
     setFormData(channel ? { ...channel } : {});
@@ -105,7 +105,6 @@ console.log(ability)
           );
         }
         // setRefetcher(false)
-
       } else if (ability && ability.can("create", "Channel")) {
         await createChannel({ ...formData, userId: user!.id }, user!);
       } else {

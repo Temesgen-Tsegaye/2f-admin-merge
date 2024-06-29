@@ -36,19 +36,20 @@ import {
 } from "material-react-table";
 import { validateProgram, Program } from "./programType";
 import { Program as PrismaProgram } from "@prisma/client";
-import { allChannels } from "@/server-actions/channelActions";
+import { allChannels } from "@/actions/channelAction";
 import {
   createProgram,
   updateProgram,
   deleteProgram,
   fetchPrograms,
   getProgramById,
-} from "@/server-actions/programActions";
+} from "@/actions/programActions";
 // import { useSocket, emitSocketEvent } from "@/utils/socketUtils";
 
 import { AppAbility, defineAbilitiesFor } from "@/lib/abilities";
-import { UserWithRole } from "@/context/types";
+import { UserWithPermission } from "@/types/types";
 import { subject } from "@casl/ability";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface Setter {
   id: number;
@@ -56,10 +57,12 @@ interface Setter {
 }
 
 interface ProgramManagementProps {
-  user: UserWithRole;
+  data: Program[];
+  totalRowCount: number;
+  user: UserWithPermission;
 }
 
-const ProgramManagement: React.FC<ProgramManagementProps> = ({ user }) => {
+const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCount,user }) => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string | number, string | number | undefined>
   >({});
@@ -92,7 +95,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ user }) => {
       type_name: "equals",
       channel_name: "contains",
       category_name: "equals",
-      airDate: "between",
+      released: "between",
     });
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<MRT_SortingState>([]);
@@ -110,26 +113,50 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ user }) => {
     fetchAbilities();
   }, [user]);
 
-  const programsData = useCallback(async () => {
+  const searchParams = useSearchParams();
+  const pathName = usePathname();
+  const { replace } = useRouter();
+
+  // useEffect(() => {
+  //   setIsLoading(true);
+  //   ;
+  //   const fetchURL = new URLSearchParams(searchParams)
+  //   fetchURL.set("start", `${pagination.pageIndex}`)
+  //   fetchURL.set("size", `${pagination.pageSize}`)
+  //   fetchURL.set("filtersFn",JSON.stringify(columnFilterFns ?? []))
+
+  //   fetchURL.set("filters", JSON.stringify(columnFilters ?? []))
+  //   fetchURL.set("globalFilter", globalFilter ?? "")
+  //   fetchURL.set("sorting", JSON.stringify(sorting ?? []))
+
+  //   replace(`${pathName}?${fetchURL.toString()}`)
+  //   setIsLoading(false)
+
+  // }, [
+  //   columnFilters,
+  //   columnFilterFns,
+  //   globalFilter,
+  //   pagination.pageIndex,
+  //   pagination.pageSize,
+  //   sorting,
+  //   replace,
+  //   searchParams,
+  //   pathName
+  // ]);
+
+  useEffect(() => {
     setIsLoading(true);
-    try {
-      const params = {
-        start: `${pagination.pageIndex}`,
-        size: `${pagination.pageSize}`,
-        filters: JSON.stringify(columnFilters ?? []),
-        filtersFn: JSON.stringify(columnFilterFns ?? []),
-        globalFilter: globalFilter ?? "",
-        sorting: JSON.stringify(sorting ?? []),
-      };
-      const { records, totalRowCount } = await fetchPrograms(params, user);
-      setPrograms(records);
-      setRowCount(totalRowCount);
-    } catch (error) {
-      console.error("Error fetching programs:", error);
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
-    }
+    const fetchURL = new URLSearchParams(searchParams);
+    fetchURL.set("start", `${pagination.pageIndex}`);
+    fetchURL.set("size", `${pagination.pageSize}`);
+    fetchURL.set("filtersFn", JSON.stringify(columnFilterFns ?? []));
+
+    fetchURL.set("filters", JSON.stringify(columnFilters ?? []));
+    fetchURL.set("globalFilter", globalFilter ?? "");
+    fetchURL.set("sorting", JSON.stringify(sorting ?? []));
+
+    replace(`${pathName}?${fetchURL.toString()}`);
+    setIsLoading(false);
   }, [
     columnFilters,
     columnFilterFns,
@@ -137,23 +164,62 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ user }) => {
     pagination.pageIndex,
     pagination.pageSize,
     sorting,
+    replace,
+    searchParams,
+    pathName,
   ]);
-  useEffect(() => {
-    programsData();
-  }, [programsData]);
-  // useSocket("programsUpdated", programsData);
-
-  const channelsData = async () => {
+  const channelsData = useCallback(async () => {
     try {
       const records = await allChannels();
+      console.log(records);
       setChannels(records);
     } catch (error) {
       console.error("Error fetching channels:", error);
     }
-  };
+  }, []);
   useEffect(() => {
     channelsData();
-  }, []);
+  }, [channelsData]);
+  // const programsData = useCallback(async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const fetchURL = new URLSearchParams(searchParams);
+  //     fetchURL.set("start", `${pagination.pageIndex}`);
+  //     fetchURL.set("size", `${pagination.pageSize}`);
+  //     fetchURL.set("filtersFn", JSON.stringify(columnFilterFns ?? []));
+
+  //     fetchURL.set("filters", JSON.stringify(columnFilters ?? []));
+  //     fetchURL.set("globalFilter", globalFilter ?? "");
+  //     fetchURL.set("sorting", JSON.stringify(sorting ?? []));
+
+  //     replace(`${pathName}?${fetchURL.toString()}`);
+  //     setIsLoading(false);
+
+  //     const { records, totalRowCount } = await fetchPrograms(
+  //       searchParams,
+  //       user
+  //     );
+  //     setPrograms(records);
+  //     setRowCount(totalRowCount);
+  //   } catch (error) {
+  //     console.error("Error fetching programs:", error);
+  //     setIsError(true);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, [
+  //   columnFilters,
+  //   columnFilterFns,
+  //   globalFilter,
+  //   pagination.pageIndex,
+  //   pagination.pageSize,
+  //   sorting,
+  // ]);
+  // useEffect(() => {
+  //   programsData();
+  // }, [programsData]);
+  // useSocket("programsUpdated", programsData);
+
   // useSocket("channelsUpdated", channelsData);
 
   useEffect(() => {
@@ -215,8 +281,8 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ user }) => {
           duration: newProgram.duration,
           description: newProgram.description,
           videoUrl: newProgram.videoUrl,
-          airDate: newProgram.airDate,
-          isActive: newProgram.isActive,
+          released: newProgram.released,
+          isActive: newProgram.status,
           channelId: newProgram.channelId,
           typeId: newProgram.typeId,
           categoryId: newProgram.categoryId,
@@ -237,12 +303,12 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ user }) => {
       } else {
         const endDate = new Date();
         const randomDays = Math.floor(Math.random() * 30) + 1;
-        const airDate = new Date(endDate);
-        airDate.setDate(airDate.getDate() - randomDays);
+        const released = new Date(endDate);
+        released.setDate(released.getDate() - randomDays);
 
-        await createProgram({ ...newProgram, airDate, userId: user.id }, user);
+        await createProgram({ ...newProgram, released, userId: user.id }, user);
       }
-      programsData();
+      // programsData();
       // emitSocketEvent("programsUpdated");
       handleCloseDialog();
     } catch (error) {
@@ -265,7 +331,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ user }) => {
     ) {
       try {
         await deleteProgram(id, user);
-        programsData();
+        // programsData();
         // socket.emit("programsUpdated");
       } catch (error) {
         console.error("Error deleting program:", error);
@@ -386,9 +452,10 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ user }) => {
         size: 100,
       },
       {
-        accessorFn: (row) => (row.airDate ? new Date(row.airDate) : new Date()),
-        id: "airDate",
-        header: "Air Date",
+        accessorFn: (row) =>
+          row.released ? new Date(row.released) : new Date(),
+        id: "released",
+        header: "Released Date",
         filterVariant: "datetime",
         filterFn: "between",
         columnFilterModeOptions: filteringMethods.numeric as MRT_FilterOption[],
@@ -403,7 +470,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ user }) => {
 
   const table = useMaterialReactTable({
     columns,
-    data: programs,
+    data: data,
     getRowId: (row) => String(row.id),
     initialState: {
       showColumnFilters: true,
@@ -427,7 +494,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ user }) => {
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
-    rowCount,
+    rowCount:totalRowCount,
     state: {
       columnFilters,
       columnFilterFns,

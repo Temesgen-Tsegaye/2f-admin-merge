@@ -1,9 +1,8 @@
-// import React from "react";
-// import RoleManagement from "@/components/roles/RoleManagement";
-// import withAuth from "@/hoc/withAuth";
+import React from "react";
+import RoleManagement from "@/components/roles/RoleManagement";
 
-// const Roles: React.FC = () => {
-//   return <RoleManagement />;
-// };
+const RolePage: React.FC = () => {
+  return <RoleManagement />;
+};
 
-// export default withAuth(Roles);
+export default RolePage;
