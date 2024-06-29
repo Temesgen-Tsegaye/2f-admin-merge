@@ -6,7 +6,7 @@ const hostname = 'localhost';
 const port = 4000;
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
-
+import  {ChannelRealtime} from './src/utils/realtime/channel'
 
 app.prepare().then(async () => {
   const httpServer = createServer(handler);
@@ -15,11 +15,9 @@ app.prepare().then(async () => {
 
   async function onConnection(socket: any) {
     console.log('user disconnected');
+    await ChannelRealtime(io, socket);
 
-    socket.on('news', (message:any) => {
-        console.log(message,'mess')
-        io.emit('news', message);
-    });
+   
   }
          
   io.on('connection', await onConnection);

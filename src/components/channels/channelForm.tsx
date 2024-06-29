@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { ChannelData } from "@/types/types";
 import { AppAbility } from "@/lib/abilities";
+import {socket} from "../../utils/socket-cleint"
 
 interface ChannelDialogProps {
   open: boolean;
@@ -88,7 +89,13 @@ const ChannelDialog: React.FC<ChannelDialogProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleSubmit}>
+        <Button onClick={()=>{
+          handleSubmit().then(()=>{
+            socket.emit("addChannel")
+          })
+         
+
+        }}>
           {currentChannel ? "Update" : "Add"}
         </Button>
       </DialogActions>

@@ -16,6 +16,7 @@ import { ZodError } from "zod";
 import { Box } from "@mui/material";
 import { subject } from "@casl/ability";
 import { Channel } from "@prisma/client";
+import { socket } from "@/utils/socket-cleint";
 
 interface ChannelManagementProps {
   data: Channel[];
@@ -107,6 +108,7 @@ const ChannelManagement: React.FC<ChannelManagementProps> = ({
         // setRefetcher(false)
       } else if (ability && ability.can("create", "Channel")) {
         await createChannel({ ...formData, userId: user!.id }, user!);
+        socket.emit("addChannel");
       } else {
         setValidationError("You do not have permission to create a channel.");
       }
