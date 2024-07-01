@@ -1,46 +1,49 @@
-// import { db } from "@/db"
-// import { NextResponse } from "next/server"
+import { prisma } from "@/db"
+import { NextResponse } from "next/server"
+import bcrypt from "bcrypt"
 
-// export async function POST(req: Request) {
-//   try {
-//     const body = await req.json()
-//     const { email, name, password, roleId } = body
-//     //check if email exists
+export async function POST(req: Request) {
+  try {
+    const body = await req.json()
+    const { email, name, password, roleId } = body
+    //check if email exists
 
-//     const existingUser = await db.user.findFirst({
-//       where: {
-//         email,
-//       },
-//     })
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        email,
+      },
+    })
 
-//     if (existingUser) {
-//       return NextResponse.json(
-//         { user: null, message: "user alredy exist" },
-//         { status: 409 }
-//       )
-//     }
+    if (existingUser) {
+      return NextResponse.json(
+        { user: null, message: "user alredy exist" },
+        { status: 409 }
+      )
+    }
 
-//     const newUser = await db.user.create({
-//       data: {
-//         roleId,
-//         email,
-//         name,
-//         password,
-//       },
-//     })
+    const hashedPassword = await bcrypt.hash(password, 10)
 
-//     return NextResponse.json(
-//       { user: newUser, message: "user created" },
-//       { status: 201 }
-//     )
-//   } catch (error: unknown) {
-//     let errorMessage = "An unknown error occurred"
-//     if (error instanceof Error) {
-//       errorMessage = error.message
-//     }
-//     return NextResponse.json(
-//       { message: "An error occurred: " + errorMessage },
-//       { status: 500 }
-//     )
-//   }
-// }
+    const newUser = await prisma.user.create({
+      data: {
+        roleId,
+        email,
+        name,
+        password: hashedPassword,
+      },
+    })
+
+    return NextResponse.json(
+      { user: newUser, message: "user created" },
+      { status: 201 }
+    )
+  } catch (error: unknown) {
+    let errorMessage = "An unknown error occurred"
+    if (error instanceof Error) {
+      errorMessage = error.message
+    }
+    return NextResponse.json(
+      { message: "An error occurred: " + errorMessage },
+      { status: 500 }
+    )
+  }
+}

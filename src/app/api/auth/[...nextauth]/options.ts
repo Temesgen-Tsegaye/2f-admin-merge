@@ -4,6 +4,7 @@ import { prisma } from "@/db"
 import { NextAuthOptions } from "next-auth"
 import { getAllRolesWithPermission } from "@/actions/roleActions"
 import { getUser } from "@/actions/userActions"
+import bcrypt from "bcrypt"
 
 export const options: NextAuthOptions = {
   pages: {
@@ -31,7 +32,11 @@ export const options: NextAuthOptions = {
           return null
         }
 
-        if (user.password !== credentials.password) {
+        const passwordMatch = await bcrypt.compare(
+          credentials.password,
+          user.password
+        )
+        if (!passwordMatch) {
           return null
         }
         return {

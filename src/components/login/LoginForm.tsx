@@ -53,7 +53,9 @@ const LoginForm: React.FC = () => {
       })
 
       if (result?.error) {
-        console.error(result.error, "Failed to sign in")
+        enqueueSnackbar(`${result.error} password or email invalid`, {
+          variant: "error",
+        })
         return
       } else {
         enqueueSnackbar("Login successful", { variant: "success" })
