@@ -1,38 +1,42 @@
-"use server";
+"use server"
 
-import { Permission, PrismaClient, Role, User } from "@prisma/client";
-import { defineAbilitiesFor } from "@/lib/abilities";
-import { UserWithPermission,UserData } from "@/types/types";
+import { Permission, PrismaClient, Role, User } from "@prisma/client"
+import { defineAbilitiesFor } from "@/lib/abilities"
+import { UserWithPermission, UserData } from "@/types/types"
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
-const updateUser = async (user: UserWithPermission, data: UserData, id: string) => {
-  const ability = await defineAbilitiesFor(user);
+const updateUser = async (
+  user: UserWithPermission,
+  data: UserData,
+  id: string
+) => {
+  const ability = await defineAbilitiesFor(user)
 
   if (!ability.can("update", "User")) {
-    return { error: "Access denied" };
+    return { error: "Access denied" }
   }
 
   try {
-    const { name, email, password, roleId } = data;
+    const { name, email, password, roleId } = data
     let updateData: any = {
       name,
       email,
-    };
+    }
 
     if (password) {
-      updateData.password = password;
+      updateData.password = password
     }
 
     const role = await prisma.role.findUnique({
       where: { id: roleId },
-    });
+    })
 
     if (!role) {
-      return { error: `Role with ID '${roleId}' not found.` };
+      return { error: `Role with ID '${roleId}' not found.` }
     }
 
-    updateData.roleId = role.id;
+    updateData.roleId = role.id
 
     const updatedUser = await prisma.user.update({
       where: { id },
@@ -40,30 +44,30 @@ const updateUser = async (user: UserWithPermission, data: UserData, id: string) 
       include: {
         role: true,
       },
-    });
+    })
 
-    return updatedUser;
+    return updatedUser
   } catch (error) {
-    return { error: (error as Error).message };
+    return { error: (error as Error).message }
   }
-};
+}
 
 const createUser = async (user: UserWithPermission, data: UserData) => {
-  const ability = await defineAbilitiesFor(user);
+  const ability = await defineAbilitiesFor(user)
 
   if (!ability.can("create", "User")) {
-    return { error: "Access denied" };
+    return { error: "Access denied" }
   }
 
   try {
-    const { name, email, password, roleId } = data;
+    const { name, email, password, roleId } = data
 
     const role = await prisma.role.findUnique({
       where: { id: roleId },
-    });
+    })
 
     if (!role) {
-      return { error: `Role with ID '${roleId}' not found.` };
+      return { error: `Role with ID '${roleId}' not found.` }
     }
 
     const user = await prisma.user.create({
@@ -76,21 +80,21 @@ const createUser = async (user: UserWithPermission, data: UserData) => {
       include: {
         role: true,
       },
-    });
+    })
 
-    return user;
+    return user
   } catch (error) {
-    return { error: (error as Error).message };
+    return { error: (error as Error).message }
   }
-};
+}
 
 const getAllUsers = async (
   user: UserWithPermission
 ): Promise<{ users: UserData[] } | { error: string }> => {
-  const ability = await defineAbilitiesFor(user);
+  const ability = await defineAbilitiesFor(user)
 
   if (!ability.can("read", "User")) {
-    return { error: "Access denied" };
+    return { error: "Access denied" }
   }
 
   try {
@@ -98,21 +102,21 @@ const getAllUsers = async (
       include: {
         role: true,
       },
-    });
-    return { users };
+    })
+    return { users }
   } catch (error) {
-    return { error: (error as Error).message };
+    return { error: (error as Error).message }
   }
-};
+}
 
 const getUserById = async (
   user: UserWithPermission,
   id: string
 ): Promise<User | { error: string }> => {
-  const ability = await defineAbilitiesFor(user);
+  const ability = await defineAbilitiesFor(user)
 
   if (!ability.can("read", "User")) {
-    return { error: "Access denied" };
+    return { error: "Access denied" }
   }
 
   try {
@@ -121,36 +125,36 @@ const getUserById = async (
       include: {
         role: true,
       },
-    });
+    })
 
     if (user) {
-      return user;
+      return user
     } else {
-      return { error: "User not found" };
+      return { error: "User not found" }
     }
   } catch (error) {
-    return { error: (error as Error).message };
+    return { error: (error as Error).message }
   }
-};
+}
 
 const deleteUser = async (
   user: UserWithPermission,
   id: string
 ): Promise<void | { error: string }> => {
-  const ability = await defineAbilitiesFor(user);
+  const ability = await defineAbilitiesFor(user)
 
   if (!ability.can("delete", "User")) {
-    return { error: "Access denied" };
+    return { error: "Access denied" }
   }
 
   try {
     await prisma.user.delete({
       where: { id },
-    });
+    })
   } catch (error) {
-    return { error: (error as Error).message };
+    return { error: (error as Error).message }
   }
-};
+}
 
 // const loginUser = async ({
 //   name,
@@ -180,18 +184,17 @@ const deleteUser = async (
 
 const usersCount = async (): Promise<{ count: number } | { error: string }> => {
   try {
-    const count = await prisma.user.count();
-    return { count };
+    const count = await prisma.user.count()
+    return { count }
   } catch (error) {
-    return { error: (error as Error).message };
+    return { error: (error as Error).message }
   }
-};
-
+}
 
 const getUser = async (email: string) => {
   try {
     const user = await prisma.user.findUnique({
-      where: { email: email},
+      where: { email: email },
       include: {
         role: {
           include: {
@@ -203,22 +206,22 @@ const getUser = async (email: string) => {
           },
         },
       },
-    });
-    return user;
+    })
+    return user
   } catch (error) {
-    throw new Error("User not found");
+    throw new Error("User not found")
   }
-};
+}
 
 const getAllPermissions = async (): Promise<Permission[]> => {
   try {
-    const permissions = await prisma.permission.findMany();
-    return permissions;
+    const permissions = await prisma.permission.findMany()
+    return permissions
   } catch (error) {
-    console.error(`Error fetching permissions: ${(error as Error).message}`);
-    throw new Error("fetching Permissions failed");
+    console.error(`Error fetching permissions: ${(error as Error).message}`)
+    throw new Error("fetching Permissions failed")
   }
-};
+}
 
 const createRole = async (name: string, permissionIds: number[]) => {
   try {
@@ -226,10 +229,10 @@ const createRole = async (name: string, permissionIds: number[]) => {
       where: {
         id: { in: permissionIds },
       },
-    });
+    })
 
     if (existingPermissions.length !== permissionIds.length) {
-      throw new Error("Some permissions do not exist.");
+      throw new Error("Some permissions do not exist.")
     }
 
     const createdRole = await prisma.role.create({
@@ -248,14 +251,14 @@ const createRole = async (name: string, permissionIds: number[]) => {
           },
         },
       },
-    });
-    console.log(createdRole);
-    return createdRole;
+    })
+    console.log(createdRole)
+    return createdRole
   } catch (error) {
-    console.log(`Error creating role: ${(error as Error).message}`);
-    throw new Error("failed to create new role");
+    console.log(`Error creating role: ${(error as Error).message}`)
+    throw new Error("failed to create new role")
   }
-};
+}
 
 export {
   // loginUser,
@@ -268,4 +271,4 @@ export {
   getUser,
   getAllPermissions,
   createRole,
-};
+}

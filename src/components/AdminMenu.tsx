@@ -111,51 +111,52 @@
 
 // export default AdminMenu;
 
-"use client";
+"use client"
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import LiveTvIcon from "@mui/icons-material/LiveTv";
-import MovieFilterIcon from "@mui/icons-material/MovieFilter";
-import { Box, Button } from "@mui/material";
-import Link from "next/link";
-import { AppAbility, defineAbilitiesFor } from "@/lib/abilities";
-import { UserWithPermission } from "@/types/types";
-import { useSession } from "next-auth/react";
+import React, { useCallback, useEffect, useMemo, useState } from "react"
+import { usePathname } from "next/navigation"
+import DashboardIcon from "@mui/icons-material/Dashboard"
+import LiveTvIcon from "@mui/icons-material/LiveTv"
+import MovieFilterIcon from "@mui/icons-material/MovieFilter"
+import { Box, Button } from "@mui/material"
+import Link from "next/link"
+import { AppAbility, defineAbilitiesFor } from "@/lib/abilities"
+import { UserWithPermission } from "@/types/types"
+import { useSession } from "next-auth/react"
 
 function AdminMenu() {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
-  const { data: session } = useSession();
+  const { data: session } = useSession()
 
   const user = useMemo(() => {
-    return session?.user;
-  }, [session?.user]);
+    return session?.user
+  }, [session?.user])
 
   const getSession = useCallback(async () => {
     if (user) {
-      console.log(user);
+      console.log(user)
     }
-  }, [user]);
+  }, [user])
 
   useEffect(() => {
-    getSession();
-  }, [getSession]);
+    getSession()
+  }, [getSession])
 
-  const [ability, setAbility] = useState<AppAbility | null>(null);
+  const [ability, setAbility] = useState<AppAbility | null>(null)
 
   useEffect(() => {
     const fetchAbilities = async () => {
       const fetchedAbility = await defineAbilitiesFor(
         user as UserWithPermission
-      );
-      setAbility(fetchedAbility); // Store the fetched ability in state
-    };
+      )
+      console.log("dkjghdkjghkdfhkdjf", fetchedAbility)
+      setAbility(fetchedAbility) // Store the fetched ability in state
+    }
 
-    fetchAbilities();
-  }, [user]);
-console.log(ability)
+    fetchAbilities()
+  }, [user])
+
   const buttonStyles = (path: string) => ({
     width: "100%",
     backgroundColor: pathname === path ? "#053d75" : "transparent",
@@ -164,7 +165,7 @@ console.log(ability)
       backgroundColor: "#869eb5",
       color: "#fff",
     },
-  });
+  })
 
   return (
     <Box
@@ -243,7 +244,7 @@ console.log(ability)
         )}
       </Box>
     </Box>
-  );
+  )
 }
 
-export default AdminMenu;
+export default AdminMenu

@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { getServerSession } from "next-auth"
 import SesstionProvider from "@/context/SessionProvider"
+import SnackbarProvider from "@/context/NotistackProvider"
 import { options } from "./api/auth/[...nextauth]/options"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -22,7 +23,9 @@ export default async function RootLayout({
   return (
     <SesstionProvider session={session}>
       <html lang="en">
-        <body className={inter.className}>{children}</body>
+        <body className={inter.className}>
+          <SnackbarProvider>{children}</SnackbarProvider>
+        </body>
       </html>
     </SesstionProvider>
   )

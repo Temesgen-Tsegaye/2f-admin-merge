@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import {
   Box,
   Button,
@@ -18,10 +18,10 @@ import {
   Tooltip,
   IconButton,
   lighten,
-} from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import AddIcon from "@mui/icons-material/Add";
+} from "@mui/material"
+import EditIcon from "@mui/icons-material/Edit"
+import DeleteIcon from "@mui/icons-material/Delete"
+import AddIcon from "@mui/icons-material/Add"
 import {
   MRT_ColumnDef,
   MRT_ColumnFilterFnsState,
@@ -33,59 +33,63 @@ import {
   MRT_ToggleFiltersButton,
   MaterialReactTable,
   useMaterialReactTable,
-} from "material-react-table";
-import { validateProgram, Program } from "./programType";
-import { Program as PrismaProgram } from "@prisma/client";
-import { allChannels } from "@/actions/channelAction";
+} from "material-react-table"
+import { validateProgram, Program } from "./programType"
+import { Program as PrismaProgram } from "@prisma/client"
+import { useSnackbar } from "notistack"
+import { allChannels } from "@/actions/channelAction"
 import {
   createProgram,
   updateProgram,
   deleteProgram,
   fetchPrograms,
   getProgramById,
-} from "@/actions/programActions";
+} from "@/actions/programActions"
 // import { useSocket, emitSocketEvent } from "@/utils/socketUtils";
 
-import { AppAbility, defineAbilitiesFor } from "@/lib/abilities";
-import { UserWithPermission } from "@/types/types";
-import { subject } from "@casl/ability";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { AppAbility, defineAbilitiesFor } from "@/lib/abilities"
+import { UserWithPermission } from "@/types/types"
+import { subject } from "@casl/ability"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 interface Setter {
-  id: number;
-  name: string;
+  id: number
+  name: string
 }
 
 interface ProgramManagementProps {
-  data: Program[];
-  totalRowCount: number;
-  user: UserWithPermission;
+  data: Program[]
+  totalRowCount: number
+  user: UserWithPermission
 }
 
-const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCount,user }) => {
+const ProgramManagement: React.FC<ProgramManagementProps> = ({
+  data,
+  totalRowCount,
+  user,
+}) => {
   const [validationErrors, setValidationErrors] = useState<
     Record<string | number, string | number | undefined>
-  >({});
-  const [programs, setPrograms] = useState<Program[]>([]);
-  const [channels, setChannels] = useState<Setter[]>([]);
-  const [types, setTypes] = useState<Setter[]>([]);
-  const [categories, setCategories] = useState<Setter[]>([]);
+  >({})
+  const [programs, setPrograms] = useState<Program[]>([])
+  const [channels, setChannels] = useState<Setter[]>([])
+  const [types, setTypes] = useState<Setter[]>([])
+  const [categories, setCategories] = useState<Setter[]>([])
   const [editingProgram, setEditingProgram] =
-    useState<Partial<Program | null>>(null);
-  const [newProgram, setNewProgram] = useState<Partial<Program>>({});
+    useState<Partial<Program | null>>(null)
+  const [newProgram, setNewProgram] = useState<Partial<Program>>({})
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [isRefetching, setIsRefetching] = useState(false);
-  const [error, setError] = useState<string>();
-  const [rowCount, setRowCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false)
+  const [isError, setIsError] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [openDialog, setOpenDialog] = useState(false)
+  const [isRefetching, setIsRefetching] = useState(false)
+  const [error, setError] = useState<string>()
+  const [rowCount, setRowCount] = useState(0)
+  const { enqueueSnackbar } = useSnackbar()
 
   // table state
-  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
-    []
-  );
+  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([])
   const [columnFilterFns, setColumnFilterFns] =
     useState<MRT_ColumnFilterFnsState>({
       id: "equals",
@@ -96,67 +100,40 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
       channel_name: "contains",
       category_name: "equals",
       released: "between",
-    });
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<MRT_SortingState>([]);
+    })
+  const [globalFilter, setGlobalFilter] = useState("")
+  const [sorting, setSorting] = useState<MRT_SortingState>([])
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
     pageSize: 10,
-  });
-  const [ability, setAbility] = useState<AppAbility | null>(null);
+  })
+  const [ability, setAbility] = useState<AppAbility | null>(null)
   useEffect(() => {
     const fetchAbilities = async () => {
-      const fetchedAbility = await defineAbilitiesFor(user);
-      setAbility(fetchedAbility);
-    };
+      const fetchedAbility = await defineAbilitiesFor(user)
+      setAbility(fetchedAbility)
+    }
 
-    fetchAbilities();
-  }, [user]);
+    fetchAbilities()
+  }, [user])
 
-  const searchParams = useSearchParams();
-  const pathName = usePathname();
-  const { replace } = useRouter();
-
-  // useEffect(() => {
-  //   setIsLoading(true);
-  //   ;
-  //   const fetchURL = new URLSearchParams(searchParams)
-  //   fetchURL.set("start", `${pagination.pageIndex}`)
-  //   fetchURL.set("size", `${pagination.pageSize}`)
-  //   fetchURL.set("filtersFn",JSON.stringify(columnFilterFns ?? []))
-
-  //   fetchURL.set("filters", JSON.stringify(columnFilters ?? []))
-  //   fetchURL.set("globalFilter", globalFilter ?? "")
-  //   fetchURL.set("sorting", JSON.stringify(sorting ?? []))
-
-  //   replace(`${pathName}?${fetchURL.toString()}`)
-  //   setIsLoading(false)
-
-  // }, [
-  //   columnFilters,
-  //   columnFilterFns,
-  //   globalFilter,
-  //   pagination.pageIndex,
-  //   pagination.pageSize,
-  //   sorting,
-  //   replace,
-  //   searchParams,
-  //   pathName
-  // ]);
+  const searchParams = useSearchParams()
+  const pathName = usePathname()
+  const { replace } = useRouter()
 
   useEffect(() => {
-    setIsLoading(true);
-    const fetchURL = new URLSearchParams(searchParams);
-    fetchURL.set("start", `${pagination.pageIndex}`);
-    fetchURL.set("size", `${pagination.pageSize}`);
-    fetchURL.set("filtersFn", JSON.stringify(columnFilterFns ?? []));
+    setIsLoading(true)
+    const fetchURL = new URLSearchParams(searchParams)
+    fetchURL.set("start", `${pagination.pageIndex}`)
+    fetchURL.set("size", `${pagination.pageSize}`)
+    fetchURL.set("filtersFn", JSON.stringify(columnFilterFns ?? []))
 
-    fetchURL.set("filters", JSON.stringify(columnFilters ?? []));
-    fetchURL.set("globalFilter", globalFilter ?? "");
-    fetchURL.set("sorting", JSON.stringify(sorting ?? []));
+    fetchURL.set("filters", JSON.stringify(columnFilters ?? []))
+    fetchURL.set("globalFilter", globalFilter ?? "")
+    fetchURL.set("sorting", JSON.stringify(sorting ?? []))
 
-    replace(`${pathName}?${fetchURL.toString()}`);
-    setIsLoading(false);
+    replace(`${pathName}?${fetchURL.toString()}`)
+    setIsLoading(false)
   }, [
     columnFilters,
     columnFilterFns,
@@ -167,60 +144,19 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
     replace,
     searchParams,
     pathName,
-  ]);
+  ])
   const channelsData = useCallback(async () => {
     try {
-      const records = await allChannels();
-      console.log(records);
-      setChannels(records);
+      const records = await allChannels()
+      console.log(records)
+      setChannels(records)
     } catch (error) {
-      console.error("Error fetching channels:", error);
+      console.error("Error fetching channels:", error)
     }
-  }, []);
+  }, [])
   useEffect(() => {
-    channelsData();
-  }, [channelsData]);
-  // const programsData = useCallback(async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const fetchURL = new URLSearchParams(searchParams);
-  //     fetchURL.set("start", `${pagination.pageIndex}`);
-  //     fetchURL.set("size", `${pagination.pageSize}`);
-  //     fetchURL.set("filtersFn", JSON.stringify(columnFilterFns ?? []));
-
-  //     fetchURL.set("filters", JSON.stringify(columnFilters ?? []));
-  //     fetchURL.set("globalFilter", globalFilter ?? "");
-  //     fetchURL.set("sorting", JSON.stringify(sorting ?? []));
-
-  //     replace(`${pathName}?${fetchURL.toString()}`);
-  //     setIsLoading(false);
-
-  //     const { records, totalRowCount } = await fetchPrograms(
-  //       searchParams,
-  //       user
-  //     );
-  //     setPrograms(records);
-  //     setRowCount(totalRowCount);
-  //   } catch (error) {
-  //     console.error("Error fetching programs:", error);
-  //     setIsError(true);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }, [
-  //   columnFilters,
-  //   columnFilterFns,
-  //   globalFilter,
-  //   pagination.pageIndex,
-  //   pagination.pageSize,
-  //   sorting,
-  // ]);
-  // useEffect(() => {
-  //   programsData();
-  // }, [programsData]);
-  // useSocket("programsUpdated", programsData);
-
-  // useSocket("channelsUpdated", channelsData);
+    channelsData()
+  }, [channelsData])
 
   useEffect(() => {
     setTypes([
@@ -228,54 +164,54 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
       { id: 2, name: "Movies" },
       { id: 3, name: "TV Shows" },
       { id: 4, name: "Sports" },
-    ]);
+    ])
 
     setCategories([
       { id: 1, name: "Recommended" },
       { id: 2, name: "Popular" },
       { id: 3, name: "Featured" },
-    ]);
-  }, []);
+    ])
+  }, [])
 
   const handleOpenDialog = (program: Program | null = null) => {
-    setEditingProgram(program);
-    setNewProgram(program ? { ...program } : {});
-    setOpenDialog(true);
-  };
+    setEditingProgram(program)
+    setNewProgram(program ? { ...program } : {})
+    setOpenDialog(true)
+  }
 
   const handleCloseDialog = () => {
-    setEditingProgram(null);
-    setNewProgram({});
-    setOpenDialog(false);
-  };
+    setEditingProgram(null)
+    setNewProgram({})
+    setOpenDialog(false)
+  }
 
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = event.target;
+    const { name, value } = event.target
     setNewProgram({
       ...newProgram,
       [name]: name === "duration" ? Number(value) : value,
-    });
-  };
+    })
+  }
   const handleSelectChange = (event: SelectChangeEvent<number>) => {
-    const { name, value } = event.target;
-    setNewProgram({ ...newProgram, [name]: value });
-  };
+    const { name, value } = event.target
+    setNewProgram({ ...newProgram, [name]: value })
+  }
 
   const handleSaveProgram = async () => {
-    const validationErrors = validateProgram(newProgram);
+    const validationErrors = validateProgram(newProgram)
     if (Object.values(validationErrors).some((error) => error)) {
-      setValidationErrors(validationErrors);
-      console.log(validationErrors);
-      return;
+      setValidationErrors(validationErrors)
+      console.log(validationErrors)
+      return
     }
-    setIsSaving(true);
-    setIsError(false);
+    setIsSaving(true)
+    setIsError(false)
 
     try {
       if (editingProgram && editingProgram.id !== undefined) {
-        const { userId } = await getProgramById(editingProgram.id);
+        const { userId } = await getProgramById(editingProgram.id)
         const data = {
           title: newProgram.title,
           duration: newProgram.duration,
@@ -287,7 +223,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
           typeId: newProgram.typeId,
           categoryId: newProgram.categoryId,
           userId: userId,
-        };
+        }
         if (
           ability &&
           ability.can(
@@ -295,32 +231,39 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
             subject("Program", { ...editingProgram } as PrismaProgram)
           )
         ) {
-          await updateProgram(editingProgram.id, data, user);
+          await updateProgram(editingProgram.id, data, user)
+          enqueueSnackbar("Program updated successfully", {
+            variant: "success",
+          })
         } else {
-          console.log("not have permission");
-          setError("You do not have permission to update this program.");
+          console.log("not have permission")
+          setError("You do not have permission to update this program.")
+          enqueueSnackbar(
+            "You do not have permission to update this program.",
+            { variant: "error" }
+          )
         }
       } else {
-        const endDate = new Date();
-        const randomDays = Math.floor(Math.random() * 30) + 1;
-        const released = new Date(endDate);
-        released.setDate(released.getDate() - randomDays);
+        const endDate = new Date()
+        const randomDays = Math.floor(Math.random() * 30) + 1
+        const released = new Date(endDate)
+        released.setDate(released.getDate() - randomDays)
 
-        await createProgram({ ...newProgram, released, userId: user.id }, user);
+        await createProgram({ ...newProgram, released, userId: user.id }, user)
+        enqueueSnackbar("Program created successfully", { variant: "success" })
       }
-      // programsData();
-      // emitSocketEvent("programsUpdated");
-      handleCloseDialog();
+
+      handleCloseDialog()
     } catch (error) {
-      console.error("Error saving program:", error);
-      setIsError(true);
+      console.error("Error saving program:", error)
+      setIsError(true)
     } finally {
-      setIsSaving(false);
+      setIsSaving(false)
     }
-  };
+  }
 
   const handleDeleteProgram = async (id: number) => {
-    const programToDelete = programs.find((program) => program.id === id);
+    const programToDelete = programs.find((program) => program.id === id)
     if (
       ability &&
       ability.can(
@@ -330,47 +273,46 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
       window.confirm("Are you sure you want to delete this program?")
     ) {
       try {
-        await deleteProgram(id, user);
-        // programsData();
-        // socket.emit("programsUpdated");
+        await deleteProgram(id, user)
+        enqueueSnackbar("Program deleted successfully", { variant: "error" })
       } catch (error) {
-        console.error("Error deleting program:", error);
-        setError("You do not have permission to Delete this program.");
-        setIsError(true);
+        console.error("Error deleting program:", error)
+        setError("You do not have permission to Delete this program.")
+        setIsError(true)
       }
     }
-  };
+  }
 
   const handleColumnFiltersChange = useCallback(
     (updaterOrValue: any) => {
       const newFilters =
         typeof updaterOrValue === "function"
           ? updaterOrValue(columnFilters)
-          : updaterOrValue;
+          : updaterOrValue
 
       const updatedFilters = newFilters.map((filter: any) => {
         const column = columns.find(
           (col) => col.accessorKey === filter.id || col.id === filter.id
-        );
+        )
 
-        let filtervariant;
+        let filtervariant
         if (["id"].includes(filter.id)) {
-          filtervariant = "number";
+          filtervariant = "number"
         } else {
-          filtervariant = column?.filterVariant;
+          filtervariant = column?.filterVariant
         }
 
         return {
           ...filter,
           ...(filtervariant && { filtervariant }),
           ...(column?.accessorFn && { filtervariant: filtervariant || "text" }),
-        };
-      });
+        }
+      })
 
-      setColumnFilters(updatedFilters);
+      setColumnFilters(updatedFilters)
     },
     [columnFilters, columnFilterFns]
-  );
+  )
 
   const filteringMethods = {
     numeric: [
@@ -392,7 +334,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
       "notEquals",
     ],
     range: ["between", "betweenInclusive"],
-  };
+  }
 
   const columns = useMemo<MRT_ColumnDef<Program>[]>(
     () => [
@@ -466,7 +408,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
       },
     ],
     []
-  );
+  )
 
   const table = useMaterialReactTable({
     columns,
@@ -494,7 +436,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
-    rowCount:totalRowCount,
+    rowCount: totalRowCount,
     state: {
       columnFilters,
       columnFilterFns,
@@ -506,7 +448,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
       sorting,
     },
     renderRowActions: ({ row, table }) => {
-      const ProgramToUpdate = row.original;
+      const ProgramToUpdate = row.original
       return (
         <Box sx={{ display: "flex", gap: "1rem" }}>
           {ability &&
@@ -538,7 +480,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
               </Tooltip>
             )}
         </Box>
-      );
+      )
     },
     renderTopToolbar: ({ table }) => (
       <Box
@@ -573,7 +515,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
         </Box>
       </Box>
     ),
-  });
+  })
 
   return (
     <Box
@@ -860,7 +802,7 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({ data,totalRowCoun
         </DialogActions>
       </Dialog>
     </Box>
-  );
-};
+  )
+}
 
-export default ProgramManagement;
+export default ProgramManagement
