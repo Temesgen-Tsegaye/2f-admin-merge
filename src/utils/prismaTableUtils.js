@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-
 const prisma = new PrismaClient();
 
 const getRecordById = async (model, id) => {
@@ -16,14 +15,11 @@ const getRecordById = async (model, id) => {
 const createRecord = async (model, data, io, eventName) => {
   try {
     const recordData = { ...data, status: true };
-    const records = await prisma[model].create({ data: recordData });
+    const records = await prisma[model].create({ data: recordData },{cache:"no-store"});
     if (io && eventName) {
       io.emit(eventName);
     }
     revalidatePath(`/admin/${model}s`);
-    // revalidatePath(`/admin/channels`);
-
-
     return records;
   } catch (error) {
     console.error(`Error creating ${model}:`, error);
@@ -41,19 +37,11 @@ const updateRecord = async (model, where, data, io, eventName) => {
       io.emit(eventName);
     }
     console.log(`/admin/${model}s`);
-    // revalidatePath(`/admin/${model}s`);
-    // revalidatePath(`/admin/channels`);
-
-
-    // return records;
+    revalidatePath(`/admin/${model}s`);
   } catch (error) {
     console.error(`Error updating ${model}:`, error);
    return(error.message);
   }
-  // revalidatePath(`/admin/${model}s`);
-
-  // revalidatePath(`/admin/channels`);
- 
 };
 
 const deleteRecord = async (model, where, io, eventName) => {

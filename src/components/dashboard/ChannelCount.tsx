@@ -3,7 +3,6 @@
 import React, { use, useEffect, useState } from "react";
 import DashboardCountCard from "./DashboardCountCard";
 import { countChannels } from "@/actions/channelAction";
-// import { useSocket } from "@/utils/socketUtils";
 import  {socket} from "../../utils/socket-cleint"
 
 const ChannelCount: React.FC = () => {
@@ -28,7 +27,6 @@ const ChannelCount: React.FC = () => {
       socket.off("addChannel");
     };
   }, []);
-  // useSocket("channelsUpdated", fetchChannelCount);
 
   return (
     <DashboardCountCard

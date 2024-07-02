@@ -14,29 +14,29 @@ model Program {
   description String
   status      Boolean  @default(true)
   channelId   Int
-  channel     Channel  @relation(fields: [channelId], references: [id])
+  channel     Channel?  @relation(fields: [channelId], references: [id], onDelete: Cascade)
   typeId      Int
   type        Type     @relation(fields: [typeId], references: [id])
   categoryId  Int
   category    Category @relation(fields: [categoryId], references: [id])
   videoUrl    String?
   released    DateTime
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
 }
 
 model Channel {
   id       Int      @id @default(autoincrement())
   name     String
   status   Boolean  @default(true)
-  program   Program[]
+  program  Program[]
   userId   String
   user     User     @relation(fields: [userId], references: [id])
 }
 
 model Type {
-  id     Int     @id @default(autoincrement())
-  name   String
+  id      Int     @id @default(autoincrement())
+  name    String
   program Program[]
 }
 
@@ -64,7 +64,7 @@ model Permission {
   inverted  Boolean  @default(false)
   condition Json?
   reason    String?
-  fields    String?
+  fields    Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -75,16 +75,16 @@ model User {
   email     String   @unique
   name      String
   password  String
-  role      Role     @relation(fields: [roleId], references: [id])
   roleId    Int
+  role      Role     @relation(fields: [roleId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  program     Program[]
+  program   Program[]
   channel   Channel[]
 }
 
 model RolePermission {
-  id        Int      @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   roleId       Int
   permissionId Int
   role         Role     @relation(fields: [roleId], references: [id])

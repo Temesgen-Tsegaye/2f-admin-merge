@@ -22,6 +22,8 @@ const updateUser = async (
     let updateData: any = {
       name,
       email,
+      password,
+      roleId
     }
 
     if (password) {

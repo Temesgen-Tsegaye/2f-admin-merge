@@ -19,20 +19,20 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import { UserWithPermission } from "@/types/types";
 import { ChannelData } from "@/types/types";
-import { fetchChannels } from "@/actions/channelAction";
 import { subject } from "@casl/ability";
 import { AppAbility } from "@/lib/abilities";
 import { Channel } from "@prisma/client";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { socket } from "@/utils/socket-cleint";
 
 interface ChannelTableProps {
   user: UserWithPermission;
   ability: AppAbility | null;
   handleOpen: (channel: ChannelData | null) => void;
-  handleDelete: (id: number) => void;
-  data:Channel[]
-  totalRowCount:number
+  handleDelete: (id: number) => Promise<void>;
+  data: Channel[];
+  totalRowCount: number;
 }
 
 const ChannelTable: React.FC<ChannelTableProps> = ({
@@ -41,13 +41,11 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
   ability,
   handleOpen,
   handleDelete,
-  totalRowCount
+  totalRowCount,
 }) => {
-  const [channels, setChannels] = useState<ChannelData[]>([]);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
-  const [rowCount, setRowCount] = useState(0);
 
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
     []
@@ -61,30 +59,23 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
     pageSize: 10,
   });
 
-
-  const searchParams = useSearchParams()
-  const pathName = usePathname()
-  const { replace } = useRouter()
-
-
-
-
+  const searchParams = useSearchParams();
+  const pathName = usePathname();
+  const { replace } = useRouter();
 
   useEffect(() => {
     setIsLoading(true);
-    ;
-    const fetchURL = new URLSearchParams(searchParams)
-    fetchURL.set("start", `${pagination.pageIndex}`)
-    fetchURL.set("size", `${pagination.pageSize}`)
-    fetchURL.set("filtersFn",JSON.stringify(columnFilterFns ?? []))
-   
-    fetchURL.set("filters", JSON.stringify(columnFilters ?? []))
-    fetchURL.set("globalFilter", globalFilter ?? "")
-    fetchURL.set("sorting", JSON.stringify(sorting ?? []))
-  
-    replace(`${pathName}?${fetchURL.toString()}`)
-    setIsLoading(false)
+    const fetchURL = new URLSearchParams(searchParams);
+    fetchURL.set("start", `${pagination.pageIndex}`);
+    fetchURL.set("size", `${pagination.pageSize}`);
+    fetchURL.set("filtersFn", JSON.stringify(columnFilterFns ?? []));
 
+    fetchURL.set("filters", JSON.stringify(columnFilters ?? []));
+    fetchURL.set("globalFilter", globalFilter ?? "");
+    fetchURL.set("sorting", JSON.stringify(sorting ?? []));
+
+    replace(`${pathName}?${fetchURL.toString()}`);
+    setIsLoading(false);
   }, [
     columnFilters,
     columnFilterFns,
@@ -94,9 +85,8 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
     sorting,
     replace,
     searchParams,
-    pathName
+    pathName,
   ]);
-
 
   const handleColumnFiltersChange = useCallback(
     (updaterOrValue: any) => {
@@ -126,8 +116,6 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
     },
     [columnFilters, columnFilterFns]
   );
-
-
 
   const columns = useMemo<MRT_ColumnDef<ChannelData>[]>(
     () => [
@@ -188,7 +176,7 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
-    rowCount:totalRowCount,
+    rowCount: totalRowCount,
     state: {
       columnFilters,
       columnFilterFns,
@@ -199,40 +187,53 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
       showProgressBars: isRefetching,
       sorting,
     },
+    muiSkeletonProps: {
+      animation: "wave",
+    },
+    muiLinearProgressProps: {
+      color: "secondary",
+    },
+    muiCircularProgressProps: {
+      color: "secondary",
+    },
     renderRowActions: ({ row }) => {
       const ChannelToUpdate = row.original;
       const channelToDelete = row.original;
 
       return (
         <Box sx={{ display: "flex", gap: "1rem" }}>
-          {ability &&
-            ability.can(
-              "update",
-              subject("Channel", ChannelToUpdate as Channel)
-            ) && (
-              <Tooltip title="Edit">
-                <IconButton onClick={() => handleOpen(row.original)}>
-                  <EditIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-          {ability &&
-            ability.can(
-              "delete",
-              subject("Channel", channelToDelete as Channel)
-            ) && (
-              <Tooltip title="Delete">
-                <IconButton
-                  color="error"
-                  onClick={() =>
-                    row.original.id !== undefined &&
-                    handleDelete(row.original.id)
-                  }
-                >
-                  <DeleteIcon />
-                </IconButton>
-              </Tooltip>
-            )}
+          {ability?.can(
+            "update",
+            subject("Channel", ChannelToUpdate as Channel)
+          ) && (
+            <Tooltip title="Edit">
+              <IconButton onClick={() => handleOpen(row.original)}>
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+          {ability?.can(
+            "delete",
+            subject("Channel", channelToDelete as Channel)
+          ) && (
+            <Tooltip title="Delete">
+              <IconButton
+                color="error"
+                onClick={() =>
+                  row.original.id !== undefined &&
+                  handleDelete(row.original.id)
+                    .then(() => {
+                      socket.emit("addChannel");
+                    })
+                    .catch((error) => {
+                      console.error("Submit error:", error);
+                    })
+                }
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
       );
     },
@@ -247,7 +248,7 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
           justifyContent: "space-between",
         })}
       >
-        {ability && ability.can("create", "Channel") && (
+        {ability?.can("create", "Channel") && (
           <Button
             variant="contained"
             color="primary"

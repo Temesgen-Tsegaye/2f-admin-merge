@@ -47,18 +47,3 @@ export interface UserWithPermission {
     name: string;
   };
 }
-
-// export type UserWithPermission = UserWithRole & {
-//   permissions: {
-//     id: number;
-//     name: string;
-//     action: string
-//     subject: string
-//     inverted: boolean
-//     condition: any
-//     reason: string | null
-//     fields: string | null
-//     createdAt: Date
-//     updatedAt: Date
-//   }[];
-// }

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import React from "react"
+import React from "react";
 import {
   Box,
   Button,
@@ -11,22 +11,22 @@ import {
   FormControlLabel,
   Switch,
   TextField,
-} from "@mui/material"
-import { ChannelData } from "@/types/types"
-import { AppAbility } from "@/lib/abilities"
-import { socket } from "../../utils/socket-cleint"
+} from "@mui/material";
+import { ChannelData } from "@/types/types";
+import { AppAbility } from "@/lib/abilities";
+import { socket } from "../../utils/socket-cleint";
 
 interface ChannelDialogProps {
-  open: boolean
-  currentChannel: ChannelData | null
-  formData: Partial<ChannelData>
-  validationError: string | null
-  ability: AppAbility | null
-  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  handleSwitchChange: (event: React.ChangeEvent<HTMLInputElement>) => void
-  handleClose: () => void
-  handleSubmit: () => Promise<void>
-  isSaving: boolean
+  open: boolean;
+  currentChannel: ChannelData | null;
+  formData: Partial<ChannelData>;
+  validationError: string | null;
+  ability: AppAbility | null;
+  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSwitchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleClose: () => void;
+  handleSubmit: () => Promise<void>;
+  isSaving: boolean;
 }
 
 const ChannelDialog: React.FC<ChannelDialogProps> = ({
@@ -89,22 +89,15 @@ const ChannelDialog: React.FC<ChannelDialogProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        {/* <Button onClick={()=>{
-          handleSubmit().then(()=>{
-            socket.emit("addChannel")
-          })
-        }}>
-          {currentChannel ? "Update" : "Add"}
-        </Button> */}
         <Button
           onClick={() => {
             handleSubmit()
               .then(() => {
-                socket.emit("addChannel")
+                socket.emit("addChannel");
               })
               .catch((error) => {
-                console.error("Submit error:", error)
-              })
+                console.error("Submit error:", error);
+              });
           }}
         >
           {currentChannel
@@ -117,7 +110,7 @@ const ChannelDialog: React.FC<ChannelDialogProps> = ({
         </Button>
       </DialogActions>
     </Dialog>
-  )
-}
+  );
+};
 
-export default ChannelDialog
+export default ChannelDialog;

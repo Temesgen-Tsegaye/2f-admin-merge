@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import {
   Container,
   TextField,
@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { getAllPermissions, createRole } from "@/actions/userActions";
 import { Permission } from "@prisma/client";
+import Loading from "@/app/loading";
 
 const RoleManagement = () => {
   const [name, setName] = useState("");
@@ -83,35 +84,35 @@ const RoleManagement = () => {
           onChange={(e) => setName(e.target.value)}
           required
         />
-
-        {Object.keys(groupedPermissions).map((subject) => (
-          <Paper
-            elevation={3}
-            style={{ marginBottom: "10px", padding: "10px" }}
-            key={subject}
-          >
-            <Typography variant="subtitle1" fontSize="24px">
-              {subject}
-            </Typography>
-            <Grid container spacing={2}>
-              {groupedPermissions[subject].map((permission) => (
-                <Grid item xs={12} sm={6} key={permission.id}>
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        checked={selectedPermissions.includes(permission.id)}
-                        onChange={handleCheckboxChange}
-                        value={permission.id.toString()}
-                      />
-                    }
-                    label={permission.name}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Paper>
-        ))}
-
+        <Suspense fallback={<Loading />}>
+          {Object.keys(groupedPermissions).map((subject) => (
+            <Paper
+              elevation={3}
+              style={{ marginBottom: "10px", padding: "10px" }}
+              key={subject}
+            >
+              <Typography variant="subtitle1" fontSize="24px">
+                {subject}
+              </Typography>
+              <Grid container spacing={2}>
+                {groupedPermissions[subject].map((permission) => (
+                  <Grid item xs={12} sm={6} key={permission.id}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={selectedPermissions.includes(permission.id)}
+                          onChange={handleCheckboxChange}
+                          value={permission.id.toString()}
+                        />
+                      }
+                      label={permission.name}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Paper>
+          ))}
+        </Suspense>
         {successMessage && (
           <Typography color="green" fontWeight="600">
             {successMessage}

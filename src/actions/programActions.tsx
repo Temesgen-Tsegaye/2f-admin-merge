@@ -11,18 +11,18 @@ import {
 } from "../utils/prismaTableUtils";
 import { applyFilter } from "@/utils/filterHandler";
 import { defineAbilitiesFor } from "@/lib/abilities";
-import { UserWithPermission,ProgramData } from "@/types/types";
+import { UserWithPermission, ProgramData } from "@/types/types";
 import { accessibleBy } from "@casl/prisma";
-import {
-  ProgramSchema,
-  Program,
-} from "@/schema/index";
+import { ProgramSchema, Program } from "@/schema/index";
 import { pick } from "lodash";
 import { permittedFieldsOf } from "@casl/ability/extra";
 
 const include = { channel: true, type: true, category: true };
 
-const createProgram = async (data: Partial<Program>, user: UserWithPermission) => {
+const createProgram = async (
+  data: Partial<Program>,
+  user: UserWithPermission
+) => {
   const ability = await defineAbilitiesFor(user);
 
   if (ability.can("create", "Program")) {
@@ -39,7 +39,15 @@ const updateProgram = async (
 ) => {
   const ability = await defineAbilitiesFor(user);
 
-const FIELDS_OF_PROGRAM = ["title","description","duration","videoUrl","type","channel","category"]
+  const FIELDS_OF_PROGRAM = [
+    "title",
+    "description",
+    "duration",
+    "videoUrl",
+    "type",
+    "channel",
+    "category",
+  ];
 
   const fields = permittedFieldsOf(ability, "update", "Program", {
     fieldsFrom: (rule) => rule.fields || FIELDS_OF_PROGRAM,
@@ -69,16 +77,13 @@ const FIELDS_OF_PROGRAM = ["title","description","duration","videoUrl","type","c
 const deleteProgram = async (id: number, user: UserWithPermission) => {
   const ability = await defineAbilitiesFor(user);
 
-  if (ability.can("delete", "Program")) {
-    try {
-      return await deleteRecord("program", {
-        where: { AND: accessibleBy(ability, "delete").Program, id },
-      });
-    } catch (error) {
-      throw new Error("Permission denied");
-    }
+  try {
+    return await deleteRecord("program", {
+      where: { AND: accessibleBy(ability, "delete").Program, id },
+    });
+  } catch (error) {
+    throw new Error("Permission denied");
   }
-  throw new Error("Permission denied");
 };
 
 const countPrograms = async () => {

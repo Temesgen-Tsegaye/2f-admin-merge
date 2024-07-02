@@ -1,7 +1,6 @@
 "use client";
 
 import { allPrograms } from "@/actions/programActions";
-// import { useSocket } from "@/utils/socketUtils";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import {
@@ -114,7 +113,6 @@ const ProgramTypeLineChart: React.FC = () => {
     fetchProgramData();
   }, []);
 
-  // useSocket("programsUpdated", fetchProgramData);
 
   return (
     <Card

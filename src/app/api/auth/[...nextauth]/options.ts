@@ -1,10 +1,8 @@
-import CredentialsProvider from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { prisma } from "@/db"
-import { NextAuthOptions } from "next-auth"
-import { getAllRolesWithPermission } from "@/actions/roleActions"
-import { getUser } from "@/actions/userActions"
-import bcrypt from "bcrypt"
+import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { prisma } from "@/db";
+import { NextAuthOptions } from "next-auth";
+import bcrypt from "bcrypt";
 
 export const options: NextAuthOptions = {
   pages: {
@@ -20,31 +18,31 @@ export const options: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) {
-          return null
+          return null;
         }
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
-        })
-
+        });
+        console.log(user);
         // const user = await getUser(credentials.email)
 
         if (!user) {
-          return null
+          return null;
         }
 
         const passwordMatch = await bcrypt.compare(
           credentials.password,
           user.password
-        )
+        );
         if (!passwordMatch) {
-          return null
+          return null;
         }
         return {
           id: user.id,
           name: user.name,
           email: user.email,
           roleId: user.roleId,
-        }
+        };
       },
     }),
   ],
@@ -55,9 +53,9 @@ export const options: NextAuthOptions = {
           ...token,
           // roleId: user.roleId,
           id: user.id,
-        }
+        };
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
       return {
@@ -67,7 +65,7 @@ export const options: NextAuthOptions = {
           roleId: token.roleId,
           id: token.id,
         },
-      }
+      };
     },
   },
   session: {
@@ -75,4 +73,4 @@ export const options: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
-}
+};

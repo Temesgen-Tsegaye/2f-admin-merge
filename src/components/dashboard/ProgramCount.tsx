@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import DashboardCountCard from "./DashboardCountCard";
 import { countPrograms } from "@/actions/programActions";
-// import { useSocket } from "@/utils/socketUtils";
 
 const ProgramCount: React.FC = () => {
   const [programCount, setProgramCount] = useState<number>(0);
@@ -19,8 +18,6 @@ const ProgramCount: React.FC = () => {
   useEffect(() => {
     fetchProgramCount();
   }, []);
-
-  // useSocket("programsUpdated", fetchProgramCount);
 
   return (
     <DashboardCountCard

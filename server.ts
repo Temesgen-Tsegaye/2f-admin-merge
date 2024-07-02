@@ -16,7 +16,6 @@ app.prepare().then(async () => {
   async function onConnection(socket: any) {
     console.log('user disconnected');
     await ChannelRealtime(io, socket);
-
    
   }
          

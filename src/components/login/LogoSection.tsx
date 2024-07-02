@@ -1,7 +1,7 @@
-import React from "react"
-import { Box, Typography } from "@mui/material"
-import Image from "next/image"
-// import tmoviesLogo from "../../../../public/t_movie_logo.png"
+import React from "react";
+import { Box, Typography } from "@mui/material";
+import Image from "next/image";
+import tmoviesLogo from "../../../../public/t_movie_logo.png";
 
 const LogoSection: React.FC = () => {
   return (
@@ -19,7 +19,7 @@ const LogoSection: React.FC = () => {
         borderTopRightRadius: { xs: 32, sm: 32, md: 0 },
       }}
     >
-      {/* <Image src={tmoviesLogo} width="100" alt="T-Movie Logo" /> */}
+      <Image src={tmoviesLogo} width="100" alt="T-Movie Logo" />
       <Typography
         sx={{
           fontSize: {
@@ -35,7 +35,7 @@ const LogoSection: React.FC = () => {
         T-Movie
       </Typography>
     </Box>
-  )
-}
+  );
+};
 
-export default LogoSection
+export default LogoSection;

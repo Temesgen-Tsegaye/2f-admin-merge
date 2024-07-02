@@ -6,7 +6,6 @@ import {
   deleteRecord,
   fetchRecords,
   countRecord,
-  allRecords,
   getRecordById,
 } from "../utils/prismaTableUtils";
 
@@ -16,7 +15,6 @@ import { UserWithPermission, ChannelData, ProgramData } from "@/types/types";
 import { accessibleBy } from "@casl/prisma";
 import { pick } from "lodash";
 import { permittedFieldsOf } from "@casl/ability/extra";
-import { revalidatePath } from "next/cache";
 import { prisma } from "@/db";
 
 const createChannel = async (data: ChannelData, user: UserWithPermission) => {
@@ -38,10 +36,7 @@ const updateChannel = async (
   const fields = permittedFieldsOf(ability, "update", "Channel", {
     fieldsFrom: (rule) => rule.fields || FIELDS_OF_CHANNEL,
   });
-  console.log(fields);
-  // if (!fields.includes('name')) {
-  //   throw new Error('You are not allowed to update the name of the channel');
-  // }
+
   const updateData = pick(data, fields);
 
   if (Object.keys(updateData).length === 0) {
@@ -64,17 +59,13 @@ const updateChannel = async (
 const deleteChannel = async (id: number, user: UserWithPermission) => {
   const ability = await defineAbilitiesFor(user);
 
-  if (ability.can("delete", "Channel")) {
-    try {
-      return await deleteRecord("channel", {
-        where: { AND: accessibleBy(ability, "delete").Channel, id },
-      });
-    } catch (error) {
-      throw new Error("Permission denied");
-    }
+  try {
+    return await deleteRecord("channel", {
+      where: { AND: accessibleBy(ability, "delete").Channel, id },
+    });
+  } catch (error) {
+    throw new Error("Permission denied");
   }
-
-  throw new Error("Permission denied");
 };
 
 const countChannels = async () => {
@@ -104,11 +95,8 @@ const fetchChannels = async (
     globalFilter = "",
     sorting = "[]",
   }: ProgramData,
-  // urlquery: ProgramData,
   user: UserWithPermission
 ) => {
-  // const { start, size, filters, globalFilter, sorting, filtersFn } = urlquery;
-
   const ability = await defineAbilitiesFor(user);
   console.log(ability);
 

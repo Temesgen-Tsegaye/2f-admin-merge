@@ -10,12 +10,10 @@ const UserPage = async ({searchParams}: any) => {
     redirect("/")
   }
   console.log("session", session)
-  // console.log(searchParams)
-  // const {records,totalRowCount}=await fetchUsers(searchParams,session?.user)
+ 
   return (
     <div>
       <UserManagement user={session?.user}/>
-      {/* <UserManagement data={records} totalRowCount={totalRowCount}/> */}
     </div>
   );
 };

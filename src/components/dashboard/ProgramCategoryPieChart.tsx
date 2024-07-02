@@ -1,7 +1,6 @@
 "use client";
 
 import { allPrograms } from "@/actions/programActions";
-// import { useSocket } from "@/utils/socketUtils";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
@@ -39,7 +38,6 @@ const ProgramCategoryPieChart: React.FC = () => {
   useEffect(() => {
     programsData();
   }, []);
-  // useSocket("programsUpdated", fetchPrograms);
 
   const getCategoryCounts = () => {
     const categoryCounts = new Map<string, number>();

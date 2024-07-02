@@ -1,5 +1,5 @@
-"use client"
-import React, { useState } from "react"
+"use client";
+import React, { useState } from "react";
 import {
   TextField,
   Button,
@@ -7,29 +7,27 @@ import {
   Box,
   InputAdornment,
   CircularProgress,
-} from "@mui/material"
-import LockOpenIcon from "@mui/icons-material/LockOpen"
-import PermIdentityIcon from "@mui/icons-material/PermIdentity"
-import { useForm, Controller, SubmitHandler } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useRouter } from "next/navigation"
-import { loginSchema } from "@/schema"
-import { useSnackbar } from "notistack"
-import { useSession, signIn } from "next-auth/react"
+} from "@mui/material";
+import LockOpenIcon from "@mui/icons-material/LockOpen";
+import PermIdentityIcon from "@mui/icons-material/PermIdentity";
+import { useForm, Controller, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { loginSchema } from "@/schema";
+import { useSnackbar } from "notistack";
+import { signIn } from "next-auth/react";
 type FormData = {
-  email: string
-  password: string
-}
+  email: string;
+  password: string;
+};
 
 const LoginForm: React.FC = () => {
-  const [loading, setLoading] = useState(false)
-  const { enqueueSnackbar } = useSnackbar()
-  const router = useRouter()
-  const { data: session, status: sessionStatus } = useSession()
+  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     getValues,
   } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
@@ -37,37 +35,34 @@ const LoginForm: React.FC = () => {
       email: "",
       password: "",
     },
-  })
+  });
 
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null);
 
   const onSubmit: SubmitHandler<FormData> = async () => {
-    const { email, password } = getValues()
-    console.log(password)
+    const { email, password } = getValues();
+    console.log(password);
     try {
-      setLoading(true)
       const result = await signIn("credentials", {
         email: email,
         password: password,
         redirect: false,
-      })
+      });
 
       if (result?.error) {
         enqueueSnackbar(`${result.error} password or email invalid`, {
           variant: "error",
-        })
-        return
+        });
+        return;
       } else {
-        enqueueSnackbar("Login successful", { variant: "success" })
-        router.push("/admin")
+        enqueueSnackbar("Login successful", { variant: "success" });
+        router.push("/admin");
       }
     } catch (error) {
-      console.error("Login failed:", error)
-      setError("An error occurred during login")
-    } finally {
-      setLoading(false)
+      console.error("Login failed:", error);
+      setError("An error occurred during login");
     }
-  }
+  };
 
   return (
     <Box
@@ -151,11 +146,15 @@ const LoginForm: React.FC = () => {
             },
           }}
         >
-          {loading ? <CircularProgress color="inherit" size={25} /> : "LOGIN"}
+          {isSubmitting ? (
+            <CircularProgress color="inherit" size={25} />
+          ) : (
+            "LOGIN"
+          )}
         </Button>
       </form>
     </Box>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;

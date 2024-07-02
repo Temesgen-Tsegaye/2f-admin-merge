@@ -39,8 +39,7 @@ import { AppAbility, defineAbilitiesFor } from "@/lib/abilities";
 import { UserWithPermission } from "@/types/types";
 import { getAllRoles } from "@/actions/roleActions";
 import { userSchema } from "@/schema";
-
-
+import Loading from "@/app/loading";
 
 interface Setter {
   id: number;
@@ -52,7 +51,9 @@ interface UserManagementProps {
 }
 
 const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
-  const [selectedUser, setSelectedUser] = useState<UserWithPermission | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserWithPermission | null>(
+    null
+  );
   const [formData, setFormData] = useState<Partial<UserWithPermission>>({});
   const [validationError, setValidationError] = useState<string | null>(null);
   const [roles, setRoles] = useState<Setter[]>([]);
@@ -102,7 +103,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
   useEffect(() => {
     const fetchRoles = async () => {
       const roles = await getAllRoles();
-
       setRoles(roles);
     };
     fetchRoles();
@@ -243,6 +243,14 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
       </Box>
     ),
   });
+
+  if (!ability) {
+    return (
+      <Box>
+        <Loading />
+      </Box>
+    );
+  }
 
   return (
     <Box
