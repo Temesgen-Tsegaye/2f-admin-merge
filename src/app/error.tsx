@@ -2,7 +2,16 @@
 import React from "react";
 
 function Error() {
-  return <div>Error</div>;
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
+  return (
+    <div>
+      <div>Error</div>
+      <button onClick={handleRefresh}>Refresh</button>
+    </div>
+  );
 }
 
 export default Error;

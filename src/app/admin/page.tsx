@@ -1,13 +1,8 @@
 import Dashboard from "@/components/dashboard/Dashboards";
-import React, { Suspense } from "react";
-import Loading from "../loading";
+import React from "react";
 
 const page = () => {
-  return (
-    <Suspense fallback={<Loading />}>
-      <Dashboard />
-    </Suspense>
-  );
+  return <Dashboard />;
 };
 
 export default page;

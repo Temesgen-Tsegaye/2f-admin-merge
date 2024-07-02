@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import Image from "next/image";
-import tmoviesLogo from "../../../../public/t_movie_logo.png";
+import tmoviesLogo from "../../../public/t_movie_logo.png";
 
 const LogoSection: React.FC = () => {
   return (

@@ -14,13 +14,17 @@ import {
 import { getAllPermissions, createRole } from "@/actions/userActions";
 import { Permission } from "@prisma/client";
 import Loading from "@/app/loading";
+import { useSnackbar } from "notistack";
+import { redirect } from "next/navigation";
 
 const RoleManagement = () => {
+  const { enqueueSnackbar } = useSnackbar();
   const [name, setName] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSaving, setIsSaving] = useState();
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -51,13 +55,11 @@ const RoleManagement = () => {
     try {
       const permissionIds = selectedPermissions;
       await createRole(name, permissionIds);
-      setSuccessMessage("Role created successfully");
-      setErrorMessage("");
-      setTimeout(() => setSuccessMessage(""), 3000);
+
+      enqueueSnackbar("Role Created successfully", { variant: "success" });
+      redirect("/admin/users");
     } catch (error) {
-      setErrorMessage("Error creating role");
-      setSuccessMessage("");
-      setTimeout(() => setErrorMessage(""), 3000);
+      enqueueSnackbar("Creating Role Failed", { variant: "error" });
     }
   };
 

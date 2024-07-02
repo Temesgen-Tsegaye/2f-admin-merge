@@ -3,6 +3,7 @@
 import { Permission, PrismaClient, Role, User } from "@prisma/client"
 import { defineAbilitiesFor } from "@/lib/abilities"
 import { UserWithPermission, UserData } from "@/types/types"
+import bcrypt from "bcrypt"
 
 const prisma = new PrismaClient()
 
@@ -27,7 +28,9 @@ const updateUser = async (
     }
 
     if (password) {
-      updateData.password = password
+    const hashedPassword= await bcrypt.hash(password, 10)
+
+      updateData.password = hashedPassword
     }
 
     const role = await prisma.role.findUnique({
@@ -71,12 +74,13 @@ const createUser = async (user: UserWithPermission, data: UserData) => {
     if (!role) {
       return { error: `Role with ID '${roleId}' not found.` }
     }
+    const hashedPassword= await bcrypt.hash(password, 10)
 
     const user = await prisma.user.create({
       data: {
         name,
         email,
-        password,
+        password: hashedPassword,
         roleId: role.id,
       },
       include: {

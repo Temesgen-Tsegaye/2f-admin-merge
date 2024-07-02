@@ -40,6 +40,7 @@ import { UserWithPermission } from "@/types/types";
 import { getAllRoles } from "@/actions/roleActions";
 import { userSchema } from "@/schema";
 import Loading from "@/app/loading";
+import { useSnackbar } from "notistack";
 
 interface Setter {
   id: number;
@@ -51,6 +52,7 @@ interface UserManagementProps {
 }
 
 const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
+  const { enqueueSnackbar } = useSnackbar();
   const [selectedUser, setSelectedUser] = useState<UserWithPermission | null>(
     null
   );
@@ -74,7 +76,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
 
     fetchAbilities();
   }, [user]);
-  if (ability && !ability.can("manage", "all")) {
+  if (!ability?.can("manage", "all")) {
     return <div>Access Denied</div>;
   }
 
@@ -133,8 +135,10 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
 
       if (selectedUser) {
         await updateUser(user, parsedData, selectedUser.id!);
+        enqueueSnackbar("User Updated successfully", { variant: "success" });
       } else {
         await createUser(user, parsedData);
+        enqueueSnackbar("User Created successfully", { variant: "success" });
       }
       fetchUserData();
       handleClose();
@@ -142,6 +146,9 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
       if (error instanceof ZodError) {
         setValidationError(error.message);
       } else {
+        enqueueSnackbar(`Failed to create user`, {
+          variant: "error",
+        });
         console.error("Unexpected error:", error);
       }
     } finally {
@@ -153,9 +160,11 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         await deleteUser(user, id);
+        enqueueSnackbar("User Deleted successfully", { variant: "warning" });
         fetchUserData();
       } catch (error) {
         console.error("Error deleting user:", error);
+        enqueueSnackbar("Failed to Deleted User", { variant: "success" });
       }
     }
   };
@@ -269,7 +278,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
           <DialogContent>
             <TextField
               label="Username"
-              name="username"
+              name="name"
               value={formData.name || ""}
               onChange={handleChange}
               fullWidth
@@ -289,7 +298,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
               onChange={handleChange}
               fullWidth
               margin="normal"
-              type="password"
+              type="text"
             />
             <FormControl fullWidth margin="normal">
               <TextField

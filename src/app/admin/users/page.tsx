@@ -1,10 +1,9 @@
-// import { fetchUsers } from "@/actions/userActions";
 import { options } from "@/app/api/auth/[...nextauth]/options";
 import UserManagement from "@/components/users/UserManagment";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
-const UserPage = async ({searchParams}: any) => {
+const UserPage = async () => {
   const session = await getServerSession(options)
   if (!session) {
     redirect("/")
