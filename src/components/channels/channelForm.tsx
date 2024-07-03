@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import {
   Box,
@@ -20,7 +18,8 @@ interface ChannelDialogProps {
   open: boolean;
   currentChannel: ChannelData | null;
   formData: Partial<ChannelData>;
-  validationError: string | null;
+  validationError: Record<string, string | undefined> | null;
+  generalError: string | null;
   ability: AppAbility | null;
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSwitchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -34,6 +33,7 @@ const ChannelDialog: React.FC<ChannelDialogProps> = ({
   currentChannel,
   formData,
   validationError,
+  generalError,
   ability,
   handleChange,
   handleSwitchChange,
@@ -56,6 +56,8 @@ const ChannelDialog: React.FC<ChannelDialogProps> = ({
                 value={formData.name || ""}
                 onChange={handleChange}
                 fullWidth
+                error={!!validationError?.name}
+                helperText={validationError?.name}
               />
             )}
             {ability?.can("update", "Channel", "status") && (
@@ -81,11 +83,12 @@ const ChannelDialog: React.FC<ChannelDialogProps> = ({
               value={formData.name || ""}
               onChange={handleChange}
               fullWidth
+              error={!!validationError?.name}
+              helperText={validationError?.name}
             />
           </>
         )}
-
-        {validationError && <p style={{ color: "red" }}>{validationError}</p>}
+        {generalError && <p style={{ color: "red" }}>{generalError}</p>}
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>

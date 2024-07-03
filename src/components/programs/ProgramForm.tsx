@@ -16,7 +16,7 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { validateProgram, Program } from "./programType";
+import { validateProgram, Program } from "@/validation/program";
 import {
   createProgram,
   updateProgram,

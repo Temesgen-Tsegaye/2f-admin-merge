@@ -26,7 +26,7 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
-import { z, ZodError } from "zod";
+import { ZodError } from "zod";
 
 import {
   createUser,
@@ -38,9 +38,10 @@ import {
 import { AppAbility, defineAbilitiesFor } from "@/lib/abilities";
 import { UserWithPermission } from "@/types/types";
 import { getAllRoles } from "@/actions/roleActions";
-import { userSchema } from "@/schema";
+
 import Loading from "@/app/loading";
 import { useSnackbar } from "notistack";
+import { userSchema } from "@/validation/user";
 
 interface Setter {
   id: number;
@@ -126,6 +127,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
   const handleSubmit = async () => {
     setIsSaving(true);
     try {
+      
       const parsedData = userSchema.parse(formData);
 
       if (selectedUser) {
