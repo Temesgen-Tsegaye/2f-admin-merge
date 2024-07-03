@@ -1,11 +1,12 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/db";
 
 const createRole = async (name: string, permissionIds: number[]) => {
   try {
+    if (!permissionIds.length) {
+      return "No Permission selected";
+    }
     const existingPermissions = await prisma.permission.findMany({
       where: {
         id: { in: permissionIds },

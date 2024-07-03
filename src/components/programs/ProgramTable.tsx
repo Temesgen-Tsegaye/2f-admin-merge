@@ -27,8 +27,6 @@ import { Program as PrismaProgram } from "@prisma/client";
 
 interface ProgramTableProps {
   programs: Program[];
-  setPrograms: React.Dispatch<React.SetStateAction<Program[]>>;
-  handleEditProgram: (program: Program) => void;
   handleOpenDialog: (program: Program | null) => void;
   user: UserWithPermission;
   ability: AppAbility | null;
@@ -38,8 +36,7 @@ interface ProgramTableProps {
 
 const ProgramTable: React.FC<ProgramTableProps> = ({
   programs,
-  setPrograms,
-  handleEditProgram,
+  
   handleOpenDialog,
   user,
   ability,
@@ -192,7 +189,6 @@ const ProgramTable: React.FC<ProgramTableProps> = ({
         id: "channel_name",
         header: "Channel",
         filterVariant: "select",
-        // enableColumnFilterModes: false,
         size: 100,
       },
       {
@@ -200,7 +196,6 @@ const ProgramTable: React.FC<ProgramTableProps> = ({
         id: "type_name",
         header: "Type",
         filterVariant: "select",
-        // enableColumnFilterModes: false,
         size: 50,
       },
 
@@ -211,7 +206,6 @@ const ProgramTable: React.FC<ProgramTableProps> = ({
         filterVariant: "multi-select",
         filterFn: "notEquals",
         columnFilterModeOptions: ["equals", "notEquals"],
-        // enableColumnFilterModes: false,
         size: 100,
       },
       {
@@ -232,7 +226,7 @@ const ProgramTable: React.FC<ProgramTableProps> = ({
   );
 
   const handleDeleteProgram = async (id: number) => {
-    const programToDelete = programs.find((program) => program.id === id)
+    const programToDelete = programs.find((program) => program.id === id);
     if (
       ability &&
       ability.can(
@@ -242,14 +236,14 @@ const ProgramTable: React.FC<ProgramTableProps> = ({
       window.confirm("Are you sure you want to delete this program?")
     ) {
       try {
-        await deleteProgram(id, user)
-        enqueueSnackbar("Program deleted successfully", { variant: "error" })
+        await deleteProgram(id, user);
+        enqueueSnackbar("Program deleted successfully", { variant: "error" });
       } catch (error) {
-        console.error("Error deleting program:", error)
-        setIsError(true)
+        console.error("Error deleting program:", error);
+        setIsError(true);
       }
     }
-  }
+  };
 
   const table = useMaterialReactTable({
     columns,

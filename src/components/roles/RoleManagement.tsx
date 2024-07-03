@@ -10,21 +10,21 @@ import {
   FormControlLabel,
   Grid,
   Paper,
+  CircularProgress,
 } from "@mui/material";
 import { getAllPermissions, createRole } from "@/actions/userActions";
 import { Permission } from "@prisma/client";
 import Loading from "@/app/loading";
 import { useSnackbar } from "notistack";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const RoleManagement = () => {
   const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
   const [name, setName] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [isSaving, setIsSaving] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -33,6 +33,7 @@ const RoleManagement = () => {
         setPermissions(permissionsData);
       } catch (error) {
         console.error("Error fetching permissions:", error);
+        enqueueSnackbar("Failed to fetch permissions", { variant: "error" });
       }
     };
 
@@ -52,16 +53,29 @@ const RoleManagement = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    
+    if (selectedPermissions.length === 0) {
+      enqueueSnackbar("Please select at least one permission", { variant: "warning" });
+      return;
+    }
+  
+    setIsLoading(true);
     try {
       const permissionIds = selectedPermissions;
-      await createRole(name, permissionIds);
-
-      enqueueSnackbar("Role Created successfully", { variant: "success" });
-      redirect("/admin/users");
+      const createdRole = await createRole(name, permissionIds);
+      if (createdRole) {
+        enqueueSnackbar("Role created successfully", { variant: "success" });
+        setName("");
+        setSelectedPermissions([]);
+        router.push("/admin/users");
+      }
     } catch (error) {
-      enqueueSnackbar("Creating Role Failed", { variant: "error" });
+      enqueueSnackbar("Creating role failed", { variant: "error" });
+    } finally {
+      setIsLoading(false);
     }
   };
+  
 
   const groupedPermissions: { [key: string]: Permission[] } = {};
   permissions.forEach((permission: Permission) => {
@@ -115,16 +129,6 @@ const RoleManagement = () => {
             </Paper>
           ))}
         </Suspense>
-        {successMessage && (
-          <Typography color="green" fontWeight="600">
-            {successMessage}
-          </Typography>
-        )}
-        {errorMessage && (
-          <Typography color="red" fontWeight="600">
-            {errorMessage}
-          </Typography>
-        )}
 
         <Button
           type="submit"
@@ -132,8 +136,9 @@ const RoleManagement = () => {
           color="primary"
           fullWidth
           style={{ marginTop: "20px" }}
+          disabled={isLoading}
         >
-          Create Role
+          {isLoading ? <CircularProgress size={24} /> : "Create Role"}
         </Button>
       </form>
     </Container>
@@ -141,3 +146,4 @@ const RoleManagement = () => {
 };
 
 export default RoleManagement;
+
