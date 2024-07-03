@@ -17,6 +17,9 @@ import { Permission } from "@prisma/client";
 import Loading from "@/app/loading";
 import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
+import { RoleSchema } from "@/validation/role";
+
 
 const RoleManagement = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -54,15 +57,22 @@ const RoleManagement = () => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
-    if (selectedPermissions.length === 0) {
-      enqueueSnackbar("Please select at least one permission", { variant: "warning" });
+    const formData = { name, permissions: selectedPermissions };
+
+    try {
+      RoleSchema.parse(formData);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        error.errors.forEach((err) => {
+          enqueueSnackbar(err.message, { variant: "warning" });
+        });
+      }
       return;
     }
-  
+
     setIsLoading(true);
     try {
-      const permissionIds = selectedPermissions;
-      const createdRole = await createRole(name, permissionIds);
+      const createdRole = await createRole(name, selectedPermissions);
       if (createdRole) {
         enqueueSnackbar("Role created successfully", { variant: "success" });
         setName("");
@@ -75,7 +85,6 @@ const RoleManagement = () => {
       setIsLoading(false);
     }
   };
-  
 
   const groupedPermissions: { [key: string]: Permission[] } = {};
   permissions.forEach((permission: Permission) => {
@@ -146,4 +155,3 @@ const RoleManagement = () => {
 };
 
 export default RoleManagement;
-

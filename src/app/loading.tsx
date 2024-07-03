@@ -8,8 +8,8 @@ export default function Loading() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width: "100%",
-        height: "100%",
+        minWidth: "70vw",
+        minHeight: "70vh",
       }}
     >
       <CircularProgress color="warning" />

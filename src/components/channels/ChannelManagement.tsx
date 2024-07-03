@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import ChannelDialog from "./channelForm";
 import ChannelTable from "./ChannelTable";
 import { UserWithPermission } from "@/types/types";
@@ -12,12 +12,12 @@ import {
   deleteChannel,
   getChannelById,
 } from "@/actions/channelAction";
-import { ZodError } from "zod";
 import { Box } from "@mui/material";
 import { subject } from "@casl/ability";
 import { Channel } from "@prisma/client";
 import { socket } from "@/utils/socket-cleint";
 import Loading from "@/app/loading";
+import { validateChannel } from "@/validation/channel";
 
 interface ChannelManagementProps {
   data: Channel[];
@@ -35,7 +35,12 @@ const ChannelManagement: React.FC<ChannelManagementProps> = ({
     null
   );
   const [formData, setFormData] = useState<Partial<ChannelData>>({});
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<Record<
+    string,
+    string | undefined
+  > | null>(null);
+  const [generalError, setGeneralError] = useState<string | null>(null);
+
   const [channels, setChannels] = useState<ChannelData[]>([]);
   const [ability, setAbility] = useState<AppAbility | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -75,6 +80,15 @@ const ChannelManagement: React.FC<ChannelManagementProps> = ({
 
   const handleSubmit = async (): Promise<void> => {
     try {
+      // Validate form data
+      const validationErrors = validateChannel(formData);
+      if (Object.keys(validationErrors).length > 0) {
+        setValidationError(validationErrors);
+        return;
+      } else {
+        setValidationError(null); // Clear previous validation errors if no errors
+      }
+
       if (currentChannel && currentChannel.id !== undefined) {
         const { userId } = await getChannelById(currentChannel.id);
 
@@ -91,10 +105,7 @@ const ChannelManagement: React.FC<ChannelManagementProps> = ({
           });
           setIsSaving(false);
         } else {
-          enqueueSnackbar(
-            "You do not have permission to update this channel.",
-            { variant: "error" }
-          );
+          setGeneralError("You do not have permission to update this channel.");
         }
       } else if (ability?.can("create", "Channel")) {
         setIsSaving(true);
@@ -103,17 +114,11 @@ const ChannelManagement: React.FC<ChannelManagementProps> = ({
         socket.emit("addChannel");
         setIsSaving(false);
       } else {
-        enqueueSnackbar("You do not have permission to create a channel.", {
-          variant: "error",
-        });
+        setGeneralError("You do not have permission to create a channel.");
       }
       handleClose();
     } catch (error) {
-      if (error instanceof ZodError) {
-        setValidationError(error.message);
-      } else {
-        console.error("Unexpected error:", error);
-      }
+      console.error("Unexpected error:", error);
     }
   };
 
@@ -135,7 +140,7 @@ const ChannelManagement: React.FC<ChannelManagementProps> = ({
         console.error("Error deleting channel:", error);
       }
     } else {
-      setValidationError("You do not have permission to delete this channel.");
+      setGeneralError("You do not have permission to delete this channel.");
     }
   };
 
@@ -175,6 +180,7 @@ const ChannelManagement: React.FC<ChannelManagementProps> = ({
         handleClose={handleClose}
         handleSubmit={handleSubmit}
         isSaving={isSaving}
+        generalError={generalError}
       />
     </Box>
   );

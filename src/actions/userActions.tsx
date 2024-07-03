@@ -29,12 +29,6 @@ const updateUser = async (
       roleId,
     };
 
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      updateData.password = hashedPassword;
-    }
-
     const role = await prisma.role.findUnique({
       where: { id: roleId },
     });
@@ -76,6 +70,9 @@ const createUser = async (user: UserWithPermission, data: UserData) => {
 
     if (!role) {
       return { error: `Role with ID '${roleId}' not found.` };
+    }
+    if (!password) {
+      return "No password setted";
     }
     const hashedPassword = await bcrypt.hash(password, 10);
 
