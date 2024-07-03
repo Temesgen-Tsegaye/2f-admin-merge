@@ -4,7 +4,7 @@ import { Permission, PrismaClient, Role, User } from "@prisma/client";
 import { defineAbilitiesFor } from "@/lib/abilities";
 import { UserWithPermission, UserData } from "@/types/types";
 import bcrypt from "bcrypt";
-
+import { logger } from "@/utils/winston";
 const prisma = new PrismaClient();
 
 const updateUser = async (
@@ -13,8 +13,10 @@ const updateUser = async (
   id: string
 ) => {
   const ability = await defineAbilitiesFor(user);
-
+ 
+  logger.info(JSON.stringify({user,data,id}));
   if (!ability.can("update", "User")) {
+    logger.error("Access denied");
     return { error: "Access denied" };
   }
 
@@ -60,6 +62,8 @@ const createUser = async (user: UserWithPermission, data: UserData) => {
   const ability = await defineAbilitiesFor(user);
 
   if (!ability.can("create", "User")) {
+
+    logger.error(`Access denied to create user ${JSON.stringify({user,data})}`);
     return { error: "Access denied" };
   }
 
@@ -99,6 +103,7 @@ const getAllUsers = async (
   const ability = await defineAbilitiesFor(user);
 
   if (!ability.can("read", "User")) {
+    logger.error(`Access denied to get all users ${JSON.stringify({user})}`);
     return { error: "Access denied" };
   }
 
@@ -121,6 +126,7 @@ const getUserById = async (
   const ability = await defineAbilitiesFor(user);
 
   if (!ability.can("read", "User")) {
+    logger.error(`Access denied to get user by id ${JSON.stringify({user,id})}`);
     return { error: "Access denied" };
   }
 
@@ -149,6 +155,7 @@ const deleteUser = async (
   const ability = await defineAbilitiesFor(user);
 
   if (!ability.can("delete", "User")) {
+    logger.error(`Access denied to delete user ${JSON.stringify({user,id})}`);
     return { error: "Access denied" };
   }
 

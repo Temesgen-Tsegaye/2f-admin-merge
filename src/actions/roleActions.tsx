@@ -1,10 +1,12 @@
 "use server";
 
 import { prisma } from "@/db";
+import { logger } from "@/utils/winston";
 
 const createRole = async (name: string, permissionIds: number[]) => {
   try {
     if (!permissionIds.length) {
+      logger.error("No Permission selected");
       return "No Permission selected";
     }
     const existingPermissions = await prisma.permission.findMany({
@@ -14,6 +16,7 @@ const createRole = async (name: string, permissionIds: number[]) => {
     });
 
     if (existingPermissions.length !== permissionIds.length) {
+      logger.error("Some permissions do not exist.");
       throw new Error("Some permissions do not exist.");
     }
 
@@ -37,6 +40,7 @@ const createRole = async (name: string, permissionIds: number[]) => {
     return createdRole;
   } catch (error) {
     console.error(`Error creating role: ${(error as Error).message}`);
+    logger.error(`Error creating role`);
     throw new Error("Failed to create new role");
   }
 };
@@ -46,6 +50,7 @@ const getAllRoles = async () => {
     return roles;
   } catch (error) {
     console.error(`Error fetching roles: ${(error as Error).message}`);
+    logger.error(`Error fetching roles`);
     throw new Error("Failed to fetch roles");
   }
 };
@@ -63,6 +68,7 @@ const getAllRolesWithPermission = async () => {
     return roles;
   } catch (error) {
     console.error(`Error fetching roles: ${(error as Error).message}`);
+    logger.error(`Error fetching roles`);
     throw new Error("Failed to fetch roles");
   }
 };
@@ -82,6 +88,7 @@ const getRoleById = async (id: number) => {
     return role;
   } catch (error) {
     console.error(`Error fetching role: ${(error as Error).message}`);
+    logger.error(`Error fetching role`);
     throw new Error("Failed to fetch role");
   }
 };
@@ -124,6 +131,7 @@ const updateRole = async (
     return updatedRole;
   } catch (error) {
     console.error(`Error updating role: ${(error as Error).message}`);
+    logger.error(`Error updating role`);
     throw new Error("Failed to update role");
   }
 };
@@ -135,6 +143,7 @@ const deleteRole = async (id: number) => {
     });
   } catch (error) {
     console.error(`Error deleting role: ${(error as Error).message}`);
+    logger.error(`Error deleting role`);
     throw new Error("Failed to delete role");
   }
 };
