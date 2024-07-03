@@ -1,22 +1,21 @@
 import { options } from "@/app/api/auth/[...nextauth]/options";
 import UserManagement from "@/components/users/UserManagment";
+import { UserWithPermission } from "@/types/types";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 const UserPage = async () => {
-  const session = await getServerSession(options)
+  const session = await getServerSession(options);
   if (!session) {
-    redirect("/")
+    redirect("/");
   }
-  console.log("session", session)
- 
+  console.log("session", session);
+
   return (
     <div>
-      <UserManagement user={session?.user}/>
+      <UserManagement user={session?.user as UserWithPermission} />
     </div>
   );
 };
 
 export default UserPage;
-
-

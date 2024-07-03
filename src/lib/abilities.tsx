@@ -3,13 +3,10 @@ import { User, Channel, Program, Prisma, RolePermission } from "@prisma/client";
 import {
   AbilityBuilder,
   AbilityClass,
-  FieldMatcher,
   PureAbility,
 } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
 import { UserWithPermission } from "@/types/types";
-import { getUser } from "@/actions/userActions";
-// import { getUser } from "@/actions/userActions";
 
 export type AppAbility = PureAbility<
   [
@@ -29,27 +26,22 @@ type AppSubjects = "User" | "Channel" | "Program" | "all";
 
 export const AppAbility = PureAbility as AbilityClass<AppAbility>;
 
-// export const fieldMatcher: FieldMatcher = (fields) => (field) =>
-//   fields.includes(field);
 
 export async function defineAbilitiesFor(user: UserWithPermission) {
   const email = user?.email;
   console.log(email);
-  const loggeduser = await getUser(email);
-  console.log(loggeduser);
-  if (!user) throw new Error("User not found");
+  
   console.log(user);
-  console.log(loggeduser);
   const { can, cannot, build } = new AbilityBuilder<AppAbility>(
     createPrismaAbility
   );
-  loggeduser?.role.permissions.forEach(({ permission }) => {
+  user.role.permissions.forEach(( permission ) => {
     const subject = permission.subject as AppSubjects;
     let condition: any;
     let inverted = permission.inverted;
 
     try {
-      condition = parseConditions(permission.condition, loggeduser);
+      condition = parseConditions(permission.condition, user);
     } catch (error) {
       console.error(
         `Error parsing condition for permission ${permission.id}:`,
@@ -88,7 +80,6 @@ export async function defineAbilitiesFor(user: UserWithPermission) {
       }
     }
   });
-  console.log(build());
   return build();
 }
 

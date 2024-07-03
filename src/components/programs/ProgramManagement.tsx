@@ -74,11 +74,6 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({
     ]);
   }, []);
 
-  const handleEditProgram = (program: Program) => {
-    setEditingProgram(program);
-    setNewProgram(program);
-    setOpenDialog(true);
-  };
 
   const handleOpenDialog = (program: Program | null = null) => {
     setEditingProgram(program);
@@ -99,8 +94,6 @@ const ProgramManagement: React.FC<ProgramManagementProps> = ({
     <>
       <ProgramTable
         programs={programs}
-        setPrograms={setPrograms}
-        handleEditProgram={handleEditProgram}
         handleOpenDialog={handleOpenDialog}
         user={user}
         ability={ability}

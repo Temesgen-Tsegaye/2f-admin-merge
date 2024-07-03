@@ -1,8 +1,6 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/db";
 
 const createRole = async (name: string, permissionIds: number[]) => {
   try {

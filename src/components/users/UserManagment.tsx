@@ -76,9 +76,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
 
     fetchAbilities();
   }, [user]);
-  if (!ability?.can("manage", "all")) {
-    return <div>Access Denied</div>;
-  }
 
   const fetchUserData = useCallback(async () => {
     setIsLoading(true);
@@ -97,7 +94,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
       setIsLoading(false);
     }
   }, []);
-  console.log(users);
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
@@ -109,7 +105,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
     };
     fetchRoles();
   }, []);
-  console.log(roles);
   const handleOpen = (user: UserWithPermission | null = null) => {
     setSelectedUser(user);
     setFormData(user ? { ...user } : {});
@@ -176,7 +171,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
         header: "ID",
       },
       {
-        accessorKey: "username",
+        accessorKey: "name",
         header: "Username",
       },
       {
@@ -291,15 +286,18 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
               fullWidth
               margin="normal"
             />
-            <TextField
-              label="Password"
-              name="password"
-              value={formData.password || ""}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-              type="text"
-            />
+            {!selectedUser && (
+              <TextField
+                label="Password"
+                name="password"
+                value={formData.password || ""}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+                type="text"
+              />
+            )}
+
             <FormControl fullWidth margin="normal">
               <TextField
                 select
@@ -322,7 +320,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ user }) => {
             )}
           </DialogContent>
           <DialogActions>
-            {/* add here success or error message and add time out to the dialog to show the message*/}
             <Button onClick={handleClose} color="secondary">
               Cancel
             </Button>
