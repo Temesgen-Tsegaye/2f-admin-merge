@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "@/db";
 import { NextAuthOptions } from "next-auth";
 import bcrypt from "bcrypt";
+import { createLogger } from "@/utils/winston";
 
 export const options: NextAuthOptions = {
   pages: {
@@ -34,9 +35,12 @@ export const options: NextAuthOptions = {
             },
           },
         });
-        console.log(user);
 
+      
+        createLogger().error("no error")
+     
         if (!user) {
+          createLogger().error("no user")
           return null;
         }
 

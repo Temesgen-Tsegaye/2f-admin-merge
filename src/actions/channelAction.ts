@@ -8,7 +8,7 @@ import {
   countRecord,
   getRecordById,
 } from "../utils/prismaTableUtils";
-import { logger } from "@/utils/winston";
+import { createLogger } from "@/utils/winston";
 import { applyFilter } from "@/utils/filterHandler";
 import { defineAbilitiesFor } from "@/lib/abilities";
 import { UserWithPermission, ChannelData, ProgramData } from "@/types/types";
@@ -40,7 +40,7 @@ const updateChannel = async (
   const updateData = pick(data, fields);
 
   if (Object.keys(updateData).length === 0) {
-    logger.error("No fields to update");
+    createLogger().error("No fields to update");
     throw new Error(
       "You do not have permission to update any of the provided fields"
     );
@@ -53,7 +53,7 @@ const updateChannel = async (
       updateData
     );
   } catch (error) {
-    logger.error("Permission denied");
+    createLogger().error("Permission denied");
     throw new Error("Permission denied");
   }
 };
@@ -66,7 +66,7 @@ const deleteChannel = async (id: number, user: UserWithPermission) => {
       where: { AND: accessibleBy(ability, "delete").Channel, id },
     });
   } catch (error) {
-    logger.error("Permission denied");
+    createLogger().error("Permission denied");
     throw new Error("Permission denied");
   }
 };
@@ -81,7 +81,7 @@ const allChannels = async () => {
     return records;
   } catch (error) {
     console.error(`Error fetching all channel records:`, error);
-    logger.error(`Error fetching all channel records`);
+    createLogger().error(`Error fetching all channel records`);
     throw new Error("failed to fetch channels");
   }
 };
