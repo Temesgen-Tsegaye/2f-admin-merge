@@ -1,17 +1,22 @@
-const { createLogger, format, transports } = require("winston");
+const { createLogger, format, transports } = require("");
+
 const { combine, timestamp, prettyPrint, colorize, errors } = format;
 
-const logger = createLogger({
+export const logger = createLogger({
   format: combine(
-    errors({ stack: true }), // Add stack trace to log output
-    // Colorize log messages
-    timestamp(), // Add timestamp
-    prettyPrint() // Pretty print log entries
+    errors({ stack: true }),
+    timestamp(), 
+    prettyPrint() 
   ),
   transports: [
-    new transports.Console(), // Console transport for development
-    new transports.File({ filename: "./logger/error.log", level: "error" }), // Error log file
-    new transports.File({ filename: "./logger/info.log", level: "info" }), // Info log file
+    new transports.Console(), 
+    new transports.File({ filename: "./logger/error.log", level: "error" }),
+    new transports.File({ filename: "./logger/info.log", level: "info" }), 
+    new transports.File({ filename: "./logger/debug.log", level: "debug" }),
+    new transports.File({ filename: "./logger/notice.log", level: "notice" }),
+    new transports.File({ filename: "./logger/warning.log", level: "warning" }),
+    new transports.File({ filename: "./logger/critical.log", level: "crit" }),
+    new transports.File({ filename: "./logger/alert.log", level: "alert" }),
   ],
 });
 
@@ -19,6 +24,8 @@ try {
   throw new Error("Some error");
 } catch (err: any) {
   console.log(typeof err, err.message);
-  logger.error(err); // Log an error
+  logger.error(err); 
 }
-logger.info("Some info message"); // Log an info message
+
+
+
