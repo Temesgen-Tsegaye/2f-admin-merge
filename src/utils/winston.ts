@@ -1,33 +1,31 @@
-const { createLogger, format, transports } = require("winston");
+import winston from "winston";
 
-const { combine, timestamp, prettyPrint, colorize, errors } = format;
 
-export const logger = createLogger({
-  format: combine(
-    errors({ stack: true }),
-    timestamp(), 
-    prettyPrint() 
-  ),
-  transports: [
-    new transports.Console(), 
-    new transports.File({ filename: "./logger/error.log", level: "error" }),
-    new transports.File({ filename: "./logger/info.log", level: "info" }), 
-    new transports.File({ filename: "./logger/debug.log", level: "debug" }),
-    new transports.File({ filename: "./logger/notice.log", level: "notice" }),
-    new transports.File({ filename: "./logger/warning.log", level: "warning" }),
-    new transports.File({ filename: "./logger/critical.log", level: "crit" }),
-    new transports.File({ filename: "./logger/alert.log", level: "alert" }),
-  ],
-});
+export function createLogger(){
+  const logger = winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+      winston.format.json(),
+      winston.format.colorize()
+    ),
+    defaultMeta: { service: 'user-service' },
+    transports: [
+   
+      new winston.transports.File({ filename: 'error.log', level: 'error' }),
+      new winston.transports.File({ filename: 'combined.log' }),
+    ],
+  });
+  
+  
+  if (process.env.NODE_ENV !== 'production') {
+    logger.add(new winston.transports.Console({
+      format: winston.format.simple(),
+    }));
+  }
 
-try {
-  throw new Error("Some error");
-} catch (err: any) {
-  console.log(typeof err, err.message);
-  logger.error(err); 
+  return logger
 }
 
-logger.info("Info Info");
-
+const logger=createLogger()
 
 
