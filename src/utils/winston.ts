@@ -1,4 +1,4 @@
-const { createLogger, format, transports } = require("");
+const { createLogger, format, transports } = require("winston");
 
 const { combine, timestamp, prettyPrint, colorize, errors } = format;
 
@@ -26,6 +26,8 @@ try {
   console.log(typeof err, err.message);
   logger.error(err); 
 }
+
+logger.info("Info Info");
 
 
 
