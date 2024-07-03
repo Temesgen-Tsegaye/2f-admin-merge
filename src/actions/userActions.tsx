@@ -13,8 +13,8 @@ const updateUser = async (
   id: string
 ) => {
   const ability = await defineAbilitiesFor(user);
- 
-  logger.info(JSON.stringify({user,data,id}));
+
+  logger.info(JSON.stringify({ user, data, id }));
   if (!ability.can("update", "User")) {
     logger.error("Access denied");
     return { error: "Access denied" };
@@ -28,12 +28,6 @@ const updateUser = async (
       password,
       roleId,
     };
-
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      updateData.password = hashedPassword;
-    }
 
     const role = await prisma.role.findUnique({
       where: { id: roleId },
@@ -62,8 +56,9 @@ const createUser = async (user: UserWithPermission, data: UserData) => {
   const ability = await defineAbilitiesFor(user);
 
   if (!ability.can("create", "User")) {
-
-    logger.error(`Access denied to create user ${JSON.stringify({user,data})}`);
+    logger.error(
+      `Access denied to create user ${JSON.stringify({ user, data })}`
+    );
     return { error: "Access denied" };
   }
 
@@ -76,6 +71,9 @@ const createUser = async (user: UserWithPermission, data: UserData) => {
 
     if (!role) {
       return { error: `Role with ID '${roleId}' not found.` };
+    }
+    if (!password) {
+      return "No password setted";
     }
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -103,7 +101,7 @@ const getAllUsers = async (
   const ability = await defineAbilitiesFor(user);
 
   if (!ability.can("read", "User")) {
-    logger.error(`Access denied to get all users ${JSON.stringify({user})}`);
+    logger.error(`Access denied to get all users ${JSON.stringify({ user })}`);
     return { error: "Access denied" };
   }
 
@@ -126,7 +124,9 @@ const getUserById = async (
   const ability = await defineAbilitiesFor(user);
 
   if (!ability.can("read", "User")) {
-    logger.error(`Access denied to get user by id ${JSON.stringify({user,id})}`);
+    logger.error(
+      `Access denied to get user by id ${JSON.stringify({ user, id })}`
+    );
     return { error: "Access denied" };
   }
 
@@ -155,7 +155,9 @@ const deleteUser = async (
   const ability = await defineAbilitiesFor(user);
 
   if (!ability.can("delete", "User")) {
-    logger.error(`Access denied to delete user ${JSON.stringify({user,id})}`);
+    logger.error(
+      `Access denied to delete user ${JSON.stringify({ user, id })}`
+    );
     return { error: "Access denied" };
   }
 

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import React, { useCallback, useEffect, useMemo } from "react"
+import React, { useCallback, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,44 +8,40 @@ import {
   Avatar,
   Typography,
   Button,
-} from "@mui/material"
-import { useRouter } from "next/navigation"
-import { signOut, useSession } from "next-auth/react"
-// import { useProgramsContext } from "@/context/ProgramsContext";
+} from "@mui/material";
+import { signOut, useSession } from "next-auth/react";
+import { useSnackbar } from "notistack";
 
 interface UserProfileDialogProps {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
 }
 
 const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
   open,
   onClose,
 }) => {
-  // const { state } = useProgramsContext();
-
-  // const { user } = state;
-
-  const router = useRouter()
+  const { enqueueSnackbar } = useSnackbar();
 
   const signOutUser = async () => {
-    await signOut({ callbackUrl: "/", redirect: true })
-  }
+    await signOut({ callbackUrl: "/", redirect: true });
+    enqueueSnackbar("Logged out successfully", { variant: "info" });
+  };
 
-  const { data: session } = useSession()
+  const { data: session } = useSession();
   const user = useMemo(() => {
-    return session?.user
-  }, [session?.user])
+    return session?.user;
+  }, [session?.user]);
 
   const getAbility = useCallback(async () => {
     if (user) {
-      console.log(user)
+      console.log(user);
     }
-  }, [user])
+  }, [user]);
 
   useEffect(() => {
-    getAbility()
-  }, [getAbility])
+    getAbility();
+  }, [getAbility]);
   return (
     <Dialog
       open={open}
@@ -82,7 +78,7 @@ const UserProfileDialog: React.FC<UserProfileDialogProps> = ({
         </Button>
       </DialogActions>
     </Dialog>
-  )
-}
+  );
+};
 
-export default UserProfileDialog
+export default UserProfileDialog;

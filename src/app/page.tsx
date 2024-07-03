@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Paper, Box } from "@mui/material";
+import { Container, Paper } from "@mui/material";
 import LoginForm from "@/components/login/LoginForm";
 import LogoSection from "@/components/login/LogoSection";
 
