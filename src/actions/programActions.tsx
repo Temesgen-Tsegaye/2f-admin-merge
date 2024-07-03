@@ -9,6 +9,7 @@ import {
   allRecords,
   getRecordById,
 } from "../utils/prismaTableUtils";
+import { logger } from "@/utils/winston";
 import { applyFilter } from "@/utils/filterHandler";
 import { defineAbilitiesFor } from "@/lib/abilities";
 import { UserWithPermission, ProgramData } from "@/types/types";
@@ -29,6 +30,7 @@ const createProgram = async (
     ProgramSchema.parse(data);
     return await createRecord("program", data);
   }
+    logger.error("Permission denied");
   throw new Error("Permission denied");
 };
 
@@ -56,6 +58,7 @@ const updateProgram = async (
   const updateData = pick(data, fields);
 
   if (Object.keys(updateData).length === 0) {
+    logger.error("You do not have permission to update any of the provided fields");
     throw new Error(
       "You do not have permission to update any of the provided fields"
     );
@@ -70,6 +73,7 @@ const updateProgram = async (
       updateData
     );
   } catch (error) {
+    logger.error("Permission denied");
     throw new Error("Permission denied");
   }
 };
@@ -82,6 +86,8 @@ const deleteProgram = async (id: number, user: UserWithPermission) => {
       where: { AND: accessibleBy(ability, "delete").Program, id },
     });
   } catch (error) {
+
+    logger.error("Permission denied");
     throw new Error("Permission denied");
   }
 };
