@@ -53,22 +53,29 @@ const RoleManagement = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    
+    if (selectedPermissions.length === 0) {
+      enqueueSnackbar("Please select at least one permission", { variant: "warning" });
+      return;
+    }
+  
     setIsLoading(true);
     try {
       const permissionIds = selectedPermissions;
       const createdRole = await createRole(name, permissionIds);
       if (createdRole) {
-        enqueueSnackbar("Role Created successfully", { variant: "success" });
+        enqueueSnackbar("Role created successfully", { variant: "success" });
         setName("");
         setSelectedPermissions([]);
         router.push("/admin/users");
       }
     } catch (error) {
-      enqueueSnackbar("Creating Role Failed", { variant: "error" });
+      enqueueSnackbar("Creating role failed", { variant: "error" });
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   const groupedPermissions: { [key: string]: Permission[] } = {};
   permissions.forEach((permission: Permission) => {

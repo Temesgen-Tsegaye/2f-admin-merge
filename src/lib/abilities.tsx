@@ -35,7 +35,7 @@ export async function defineAbilitiesFor(user: UserWithPermission) {
   const { can, cannot, build } = new AbilityBuilder<AppAbility>(
     createPrismaAbility
   );
-  user.role.permissions.forEach(( permission ) => {
+  user?.role?.permissions?.forEach(( permission ) => {
     const subject = permission.subject as AppSubjects;
     let condition: any;
     let inverted = permission.inverted;
