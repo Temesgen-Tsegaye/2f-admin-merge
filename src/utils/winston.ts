@@ -26,6 +26,6 @@ export function createLogger(){
   return logger
 }
 
-const logger=createLogger()
+export const logger=createLogger()
 
 
