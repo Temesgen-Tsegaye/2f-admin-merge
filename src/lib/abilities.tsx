@@ -28,9 +28,6 @@ export const AppAbility = PureAbility as AbilityClass<AppAbility>;
 
 
 export async function defineAbilitiesFor(user: UserWithPermission) {
-  const email = user?.email;
-  console.log(email);
-  
   console.log(user);
   const { can, cannot, build } = new AbilityBuilder<AppAbility>(
     createPrismaAbility

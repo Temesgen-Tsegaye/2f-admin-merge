@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useEffect, Suspense, useState } from "react";
 import {
   Container,
   TextField,
@@ -16,16 +16,20 @@ import { getAllPermissions, createRole } from "@/actions/userActions";
 import { Permission } from "@prisma/client";
 import Loading from "@/app/loading";
 import { useSnackbar } from "notistack";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { z } from "zod";
 import { RoleSchema } from "@/validation/role";
-
 
 const RoleManagement = () => {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
+  const searchParams = useSearchParams();
+  const pathName = usePathname();
+
+  const name = searchParams.get("name") || "";
+  const selectedPermissions = JSON.parse(
+    searchParams.get("permissions") || "[]"
+  );
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -43,20 +47,28 @@ const RoleManagement = () => {
     fetchPermissions();
   }, []);
 
+  const updateSearchParams = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set(key, value);
+    router.replace(`${pathName}?${params.toString()}`, { scroll: false });
+  };
+
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const permissionId = parseInt(event.target.value);
+    let updatedPermissions;
     if (event.target.checked) {
-      setSelectedPermissions([...selectedPermissions, permissionId]);
+      updatedPermissions = [...selectedPermissions, permissionId];
     } else {
-      setSelectedPermissions(
-        selectedPermissions.filter((id) => id !== permissionId)
+      updatedPermissions = selectedPermissions.filter(
+        (id: number) => id !== permissionId
       );
     }
+    updateSearchParams("permissions", JSON.stringify(updatedPermissions));
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
+
     const formData = { name, permissions: selectedPermissions };
 
     try {
@@ -69,14 +81,11 @@ const RoleManagement = () => {
       }
       return;
     }
-
     setIsLoading(true);
     try {
       const createdRole = await createRole(name, selectedPermissions);
       if (createdRole) {
         enqueueSnackbar("Role created successfully", { variant: "success" });
-        setName("");
-        setSelectedPermissions([]);
         router.push("/admin/users");
       }
     } catch (error) {
@@ -106,7 +115,7 @@ const RoleManagement = () => {
           fullWidth
           margin="normal"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => updateSearchParams("name", e.target.value)}
           required
         />
         <Suspense fallback={<Loading />}>
