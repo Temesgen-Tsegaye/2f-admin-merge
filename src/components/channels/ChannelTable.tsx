@@ -47,21 +47,52 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
 
-  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
-    []
-  );
-  const [columnFilterFns, setColumnFilterFns] =
-    useState<MRT_ColumnFilterFnsState>({ id: "equals", name: "startsWith" });
-  const [globalFilter, setGlobalFilter] = useState("");
-  const [sorting, setSorting] = useState<MRT_SortingState>([]);
-  const [pagination, setPagination] = useState<MRT_PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
   const searchParams = useSearchParams();
   const pathName = usePathname();
   const { replace } = useRouter();
+
+  const initialFilters = useMemo(
+    () =>
+      searchParams.get("filters")
+        ? JSON.parse(searchParams.get("filters")!)
+        : [],
+    [searchParams]
+  );
+  const initialFilterFns = useMemo(
+    () =>
+      searchParams.get("filtersFn")
+        ? JSON.parse(searchParams.get("filtersFn")!)
+        : { id: "equals", name: "startsWith" },
+    [searchParams]
+  );
+  const initialSorting = useMemo(
+    () =>
+      searchParams.get("sorting")
+        ? JSON.parse(searchParams.get("sorting")!)
+        : [],
+    [searchParams]
+  );
+  const initialStart = useMemo(
+    () => (searchParams.get("start") ? Number(searchParams.get("start")) : 0),
+    [searchParams]
+  );
+  const initialSize = useMemo(
+    () => (searchParams.get("size") ? Number(searchParams.get("size")) : 10),
+    [searchParams]
+  );
+
+  const [columnFilters, setColumnFilters] =
+    useState<MRT_ColumnFiltersState>(initialFilters);
+  const [columnFilterFns, setColumnFilterFns] =
+    useState<MRT_ColumnFilterFnsState>(initialFilterFns);
+  const [globalFilter, setGlobalFilter] = useState(
+    searchParams.get("globalFilter") || ""
+  );
+  const [sorting, setSorting] = useState<MRT_SortingState>(initialSorting);
+  const [pagination, setPagination] = useState<MRT_PaginationState>({
+    pageIndex: initialStart,
+    pageSize: initialSize,
+  });
 
   useEffect(() => {
     setIsLoading(true);
@@ -69,7 +100,6 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
     fetchURL.set("start", `${pagination.pageIndex}`);
     fetchURL.set("size", `${pagination.pageSize}`);
     fetchURL.set("filtersFn", JSON.stringify(columnFilterFns ?? []));
-
     fetchURL.set("filters", JSON.stringify(columnFilters ?? []));
     fetchURL.set("globalFilter", globalFilter ?? "");
     fetchURL.set("sorting", JSON.stringify(sorting ?? []));
@@ -116,14 +146,12 @@ const ChannelTable: React.FC<ChannelTableProps> = ({
     },
     [columnFilters, columnFilterFns]
   );
-
   const columns = useMemo<MRT_ColumnDef<ChannelData>[]>(
     () => [
       {
         accessorKey: "id",
         header: "ID",
         filterFn: "equals",
-        // filterVariant: "text",
         columnFilterModeOptions: ["equals", "notEquals"] as MRT_FilterOption[],
       },
       {
