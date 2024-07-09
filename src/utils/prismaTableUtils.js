@@ -12,13 +12,11 @@ const getRecordById = async (model, id) => {
   }
 };
 
-const createRecord = async (model, data, io, eventName) => {
+const createRecord = async (model, data) => {
   try {
     const recordData = { ...data, status: true };
     const records = await prisma[model].create({ data: recordData },{cache:"no-store"});
-    if (io && eventName) {
-      io.emit(eventName);
-    }
+    
     revalidatePath(`/admin/${model}s`);
     return records;
   } catch (error) {
@@ -27,16 +25,13 @@ const createRecord = async (model, data, io, eventName) => {
   }
 };
 
-const updateRecord = async (model, where, data, io, eventName) => {
+const updateRecord = async (model, where, data) => {
   try {
     const records = await prisma[model].update({
       where,
       data,
     });
-    if (io && eventName) {
-      io.emit(eventName);
-    }
-    console.log(`/admin/${model}s`);
+   
     revalidatePath(`/admin/${model}s`);
   } catch (error) {
     console.error(`Error updating ${model}:`, error);
@@ -44,12 +39,10 @@ const updateRecord = async (model, where, data, io, eventName) => {
   }
 };
 
-const deleteRecord = async (model, where, io, eventName) => {
+const deleteRecord = async (model, where) => {
   try {
     await prisma[model].delete(where);
-    if (io && eventName) {
-      io.emit(eventName);
-    }
+
     revalidatePath(`/admin/${model}s`);
   } catch (error) {
     console.error(`Error deleting ${model}:`, error);
